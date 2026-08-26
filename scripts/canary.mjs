@@ -3,7 +3,7 @@
 // holds its invariants. A broker renaming a field overnight turns this red
 // by morning. Requires a build first: `pnpm build && node scripts/canary.mjs`.
 //
-// Credentials use the same convention as brokers-mcp:
+// Credentials use the same convention as the @luxalgo/mcp broker tools:
 //   BROKERS_<BROKER-ID>_<FIELD>  (BROKERS_ALPACA_API_KEY, …)
 // Brokers with no credentials configured are skipped, never failed.
 
