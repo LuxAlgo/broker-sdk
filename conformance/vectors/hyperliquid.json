@@ -1,0 +1,109 @@
+{
+  "broker": "hyperliquid",
+  "description": "Wallet with a short ETH perp and a spot USDC balance: two accounts come back (perps always, spot when non-empty); fills map B/A to buy/sell.",
+  "raw": {
+    "address": "0x1234567890abcdef1234567890abcdef12345678",
+    "perps": {
+      "marginSummary": {
+        "accountValue": "2500"
+      },
+      "assetPositions": [
+        {
+          "position": {
+            "coin": "ETH",
+            "szi": "-1.5",
+            "positionValue": "4500"
+          }
+        },
+        {
+          "position": {
+            "coin": "BTC",
+            "szi": "0"
+          }
+        }
+      ]
+    },
+    "spot": {
+      "balances": [
+        {
+          "coin": "USDC",
+          "total": "100"
+        },
+        {
+          "coin": "HYPE",
+          "total": "10",
+          "entryNtl": "250"
+        }
+      ]
+    },
+    "fills": [
+      {
+        "coin": "ETH",
+        "px": "3000",
+        "sz": "1.5",
+        "side": "A",
+        "time": 1735689600000,
+        "fee": "1.2"
+      },
+      {
+        "coin": "ETH",
+        "px": "0",
+        "sz": "1",
+        "side": "B"
+      },
+      {
+        "coin": "BTC",
+        "px": "60000",
+        "sz": "0.1",
+        "side": "X"
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "0x1234567890abcdef1234567890abcdef12345678-perps",
+      "name": "Hyperliquid Perps 0x1234…5678",
+      "currency": "USD",
+      "equity": 2500,
+      "positions": [
+        {
+          "symbol": "ETH",
+          "quantity": -1.5,
+          "marketValue": 4500,
+          "assetClass": "futures"
+        }
+      ],
+      "trades": [
+        {
+          "symbol": "ETH",
+          "side": "sell",
+          "quantity": 1.5,
+          "price": 3000,
+          "fee": 1.2,
+          "executedAt": "2025-01-01T00:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "id": "0x1234567890abcdef1234567890abcdef12345678-spot",
+      "name": "Hyperliquid Spot 0x1234…5678",
+      "currency": "USD",
+      "equity": 350,
+      "positions": [
+        {
+          "symbol": "USDC",
+          "quantity": 100,
+          "marketValue": 100,
+          "assetClass": "crypto"
+        },
+        {
+          "symbol": "HYPE",
+          "quantity": 10,
+          "marketValue": 250,
+          "assetClass": "crypto"
+        }
+      ],
+      "trades": []
+    }
+  ]
+}

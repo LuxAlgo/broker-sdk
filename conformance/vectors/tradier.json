@@ -1,0 +1,89 @@
+{
+  "broker": "tradier",
+  "description": "Tradier's single-item-object quirk: one position arrives as a bare object, history mixes trades with dividends, sells carry negative quantities, and positions get no marketValue because Tradier reports cost basis.",
+  "raw": {
+    "accounts": [
+      {
+        "accountNumber": "VA000001",
+        "balances": {
+          "balances": {
+            "total_equity": 25000.5,
+            "total_cash": 5000
+          }
+        },
+        "positions": {
+          "positions": {
+            "position": {
+              "symbol": "AAPL",
+              "quantity": 10,
+              "cost_basis": 1500
+            }
+          }
+        },
+        "history": {
+          "history": {
+            "event": [
+              {
+                "type": "trade",
+                "date": "2026-08-01T00:00:00Z",
+                "trade": {
+                  "symbol": "SPY",
+                  "quantity": 10,
+                  "price": 500
+                }
+              },
+              {
+                "type": "trade",
+                "date": "2026-08-05T00:00:00Z",
+                "trade": {
+                  "symbol": "SPY",
+                  "quantity": -10,
+                  "price": 510,
+                  "commission": 1
+                }
+              },
+              {
+                "type": "dividend",
+                "date": "2026-08-06T00:00:00Z"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "VA000001",
+      "name": "Tradier VA000001",
+      "currency": "USD",
+      "equity": 25000.5,
+      "cash": 5000,
+      "positions": [
+        {
+          "symbol": "AAPL",
+          "quantity": 10,
+          "averageEntryPrice": 150,
+          "assetClass": "equity"
+        }
+      ],
+      "trades": [
+        {
+          "symbol": "SPY",
+          "side": "buy",
+          "quantity": 10,
+          "price": 500,
+          "executedAt": "2026-08-01T00:00:00.000Z"
+        },
+        {
+          "symbol": "SPY",
+          "side": "sell",
+          "quantity": 10,
+          "price": 510,
+          "fee": 1,
+          "executedAt": "2026-08-05T00:00:00.000Z"
+        }
+      ]
+    }
+  ]
+}

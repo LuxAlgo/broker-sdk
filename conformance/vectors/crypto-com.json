@@ -1,0 +1,49 @@
+{
+  "broker": "crypto-com",
+  "description": "User-balance call: per-position USD market values come straight from the exchange, equity prefers total_cash_balance.",
+  "raw": {
+    "code": 0,
+    "result": {
+      "data": [
+        {
+          "total_cash_balance": "3200.4",
+          "position_balances": [
+            {
+              "instrument_name": "BTC",
+              "quantity": "0.05",
+              "market_value": "3000"
+            },
+            {
+              "instrument_name": "CRO",
+              "quantity": "1500",
+              "market_value": "195"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "expected": [
+    {
+      "id": "crypto-com",
+      "name": "Crypto.com Exchange",
+      "currency": "USD",
+      "equity": 3200.4,
+      "positions": [
+        {
+          "symbol": "BTC",
+          "quantity": 0.05,
+          "marketValue": 3000,
+          "assetClass": "crypto"
+        },
+        {
+          "symbol": "CRO",
+          "quantity": 1500,
+          "marketValue": 195,
+          "assetClass": "crypto"
+        }
+      ],
+      "trades": []
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "broker": "public",
+  "description": "Portfolio v2 plus history: trade price derives from principal ÷ quantity because history reports amounts, zero fees are omitted, non-trade rows drop out.",
+  "raw": {
+    "accounts": [
+      {
+        "accountId": "ABCD1234",
+        "portfolio": {
+          "totalAccountValue": "1500.75",
+          "positions": [
+            {
+              "instrument": {
+                "symbol": "AAPL",
+                "type": "EQUITY"
+              },
+              "quantity": "2",
+              "currentValue": "380.5"
+            }
+          ]
+        },
+        "transactions": [
+          {
+            "side": "BUY",
+            "symbol": "AAPL",
+            "quantity": "2",
+            "principalAmount": "361",
+            "fees": "0",
+            "timestamp": "2026-08-01T14:30:00Z"
+          },
+          {
+            "type": "DIVIDEND",
+            "symbol": "AAPL",
+            "principalAmount": "1.04"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "ABCD1234",
+      "name": "Public 1234",
+      "currency": "USD",
+      "equity": 1500.75,
+      "positions": [
+        {
+          "symbol": "AAPL",
+          "quantity": 2,
+          "marketValue": 380.5,
+          "assetClass": "equity"
+        }
+      ],
+      "trades": [
+        {
+          "symbol": "AAPL",
+          "side": "buy",
+          "quantity": 2,
+          "price": 180.5,
+          "executedAt": "2026-08-01T14:30:00.000Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+<svg width="1200" height="240" viewBox="0 0 1200 240" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="How every adapter stays correct: fetchRaw does IO only, normalize is pure, golden vectors gate every adapter">
+  <defs>
+    <style>
+      @font-face { font-family: 'Aeonik'; font-weight: 500; src: url(data:font/woff2;base64,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) format('woff2'); }
+    </style>
+    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 8 4 L 0 8 z" fill="#3f3f3f"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="240" rx="12" fill="#0a0a0a"/>
+  <rect x="0.5" y="0.5" width="1199" height="239" rx="11.5" stroke="#1f1f1f"/>
+
+  <text x="60" y="52" font-family="Aeonik, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-weight="500" font-size="17" fill="#ededed">How every adapter stays correct</text>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" text-anchor="middle">
+    <rect x="60" y="84" width="212" height="68" rx="8" fill="#141414" stroke="#262626"/>
+    <text x="166" y="113" font-size="14" fill="#ededed">read-only keys</text>
+    <text x="166" y="136" font-size="11.5" fill="#7d7d7d">never leave your machine</text>
+
+    <rect x="336" y="84" width="212" height="68" rx="8" fill="#141414" stroke="#262626"/>
+    <text x="442" y="113" font-size="14" fill="#ededed">fetchRaw()</text>
+    <text x="442" y="136" font-size="11.5" fill="#7d7d7d">IO only, per broker</text>
+
+    <rect x="612" y="84" width="212" height="68" rx="8" fill="#141414" stroke="#262626"/>
+    <text x="718" y="113" font-size="14" fill="#ededed">normalize()</text>
+    <text x="718" y="136" font-size="11.5" fill="#7d7d7d">pure, no network</text>
+
+    <rect x="888" y="84" width="252" height="68" rx="8" fill="#141414" stroke="#262626"/>
+    <text x="1014" y="113" font-size="14" fill="#ededed">one schema</text>
+    <text x="1014" y="136" font-size="11.5" fill="#7d7d7d">accounts &#183; positions &#183; trades</text>
+  </g>
+
+  <line x1="274" y1="118" x2="332" y2="118" stroke="#3f3f3f" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="550" y1="118" x2="608" y2="118" stroke="#3f3f3f" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="826" y1="118" x2="884" y2="118" stroke="#3f3f3f" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <line x1="718" y1="152" x2="718" y2="176" stroke="#262626" stroke-dasharray="3 4"/>
+  <rect x="336" y="176" width="764" height="32" rx="8" fill="#0a0a0a" stroke="#262626"/>
+  <text x="718" y="197" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" fill="#7d7d7d">conformance/vectors &#183; golden raw and normalized pairs gate every adapter &#183; tested with zero credentials</text>
+</svg>

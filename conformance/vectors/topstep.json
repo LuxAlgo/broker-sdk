@@ -1,0 +1,65 @@
+{
+  "broker": "topstep",
+  "description": "Futures prop account: contract ids like CON.F.US.EP.U26 normalize to the symbol segment, position type 2 means short, voided executions drop out.",
+  "raw": {
+    "accounts": [
+      {
+        "id": 8642,
+        "name": "50K Combine",
+        "balance": 51234.5,
+        "positions": [
+          {
+            "contractId": "CON.F.US.EP.U26",
+            "type": 2,
+            "size": 1,
+            "averagePrice": 5610.5
+          }
+        ],
+        "trades": [
+          {
+            "contractId": "CON.F.US.EP.U26",
+            "side": 1,
+            "size": 1,
+            "price": 5600.25,
+            "fees": 1.4,
+            "creationTimestamp": "2026-08-10T15:00:00Z",
+            "voided": false
+          },
+          {
+            "contractId": "CON.F.US.EP.U26",
+            "side": 0,
+            "size": 1,
+            "price": 5590,
+            "voided": true
+          }
+        ]
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "8642",
+      "name": "50K Combine",
+      "currency": "USD",
+      "equity": 51234.5,
+      "positions": [
+        {
+          "symbol": "EP",
+          "quantity": -1,
+          "averageEntryPrice": 5610.5,
+          "assetClass": "futures"
+        }
+      ],
+      "trades": [
+        {
+          "symbol": "EP",
+          "side": "sell",
+          "quantity": 1,
+          "price": 5600.25,
+          "fee": 1.4,
+          "executedAt": "2026-08-10T15:00:00.000Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "broker": "okx",
+  "description": "Trading account balance: per-currency USD valuations come straight from OKX, account equity prefers totalEq over the position sum.",
+  "raw": {
+    "code": "0",
+    "data": [
+      {
+        "totalEq": "500",
+        "details": [
+          {
+            "ccy": "ETH",
+            "eq": "0.2",
+            "eqUsd": "480"
+          },
+          {
+            "ccy": "USDT",
+            "eq": "20",
+            "eqUsd": "20"
+          },
+          {
+            "ccy": "GONE",
+            "eq": "0"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "okx-trading",
+      "name": "OKX trading",
+      "currency": "USD",
+      "equity": 500,
+      "positions": [
+        {
+          "symbol": "ETH",
+          "quantity": 0.2,
+          "marketValue": 480,
+          "assetClass": "crypto"
+        },
+        {
+          "symbol": "USDT",
+          "quantity": 20,
+          "marketValue": 20,
+          "assetClass": "crypto"
+        }
+      ],
+      "trades": []
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "broker": "kraken",
+  "description": "Balance call with legacy asset codes (XXBT, ZUSD) normalized to BTC/USD; USD valued at face, priced assets via public tickers, zero balances dropped.",
+  "raw": {
+    "balances": {
+      "XXBT": "0.1",
+      "ZUSD": "150",
+      "ADA": "25",
+      "XETH": "0"
+    },
+    "usdPrices": {
+      "BTC": 60000
+    }
+  },
+  "expected": [
+    {
+      "id": "kraken-spot",
+      "name": "Kraken spot",
+      "currency": "USD",
+      "equity": 6150,
+      "positions": [
+        {
+          "symbol": "BTC",
+          "quantity": 0.1,
+          "marketValue": 6000,
+          "assetClass": "crypto"
+        },
+        {
+          "symbol": "USD",
+          "quantity": 150,
+          "marketValue": 150,
+          "assetClass": "cash"
+        },
+        {
+          "symbol": "ADA",
+          "quantity": 25,
+          "assetClass": "crypto"
+        }
+      ],
+      "trades": []
+    }
+  ]
+}

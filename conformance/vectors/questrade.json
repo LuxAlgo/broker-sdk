@@ -1,0 +1,72 @@
+{
+  "broker": "questrade",
+  "description": "CAD account: equity comes from the CAD combined balance, only activities of type Trades become trades, commissions become fees.",
+  "raw": {
+    "accounts": [
+      {
+        "accountNumber": "26598145",
+        "balances": {
+          "combinedBalances": [
+            {
+              "currency": "CAD",
+              "totalEquity": 50000
+            }
+          ]
+        },
+        "positions": {
+          "positions": [
+            {
+              "symbol": "XEQT.TO",
+              "openQuantity": 100,
+              "currentMarketValue": 3500,
+              "averageEntryPrice": 34.5
+            }
+          ]
+        },
+        "activities": [
+          {
+            "type": "Trades",
+            "action": "Buy",
+            "symbol": "XEQT.TO",
+            "quantity": 100,
+            "price": 35,
+            "commission": 4.95,
+            "tradeDate": "2026-08-01T00:00:00.000000-04:00"
+          },
+          {
+            "type": "Dividends",
+            "symbol": "XEQT.TO",
+            "quantity": 0,
+            "price": 0
+          }
+        ]
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "26598145",
+      "name": "Questrade 26598145",
+      "currency": "CAD",
+      "equity": 50000,
+      "positions": [
+        {
+          "symbol": "XEQT.TO",
+          "quantity": 100,
+          "marketValue": 3500,
+          "averageEntryPrice": 34.5
+        }
+      ],
+      "trades": [
+        {
+          "symbol": "XEQT.TO",
+          "side": "buy",
+          "quantity": 100,
+          "price": 35,
+          "fee": 4.95,
+          "executedAt": "2026-08-01T04:00:00.000Z"
+        }
+      ]
+    }
+  ]
+}

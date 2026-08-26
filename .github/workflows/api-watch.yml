@@ -1,0 +1,53 @@
+name: API watch
+
+# Daily diff of broker API changelogs/specs (docs/watch/sources.json).
+# On a change: commits the new baseline hash and opens/updates an issue so
+# a human (or an AI triage pass) can check whether it touches endpoints we
+# use. Only stable machine artifacts are watched, to keep this quiet.
+
+on:
+  schedule:
+    - cron: "43 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Diff watched sources
+        run: node scripts/api-watch.mjs
+      - name: Commit new baseline
+        run: |
+          if ! git diff --quiet docs/watch/hashes.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add docs/watch/hashes.json
+            git commit -m "chore: update API watch baseline"
+            git push
+          fi
+      - name: File issue on change
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            if (!fs.existsSync("watch-report.json")) return;
+            const report = JSON.parse(fs.readFileSync("watch-report.json", "utf8"));
+            if (!report.changed || report.changed.length === 0) return;
+            const body = [
+              "A watched broker API changelog/spec changed since yesterday. Check whether it touches endpoints the adapters use.",
+              "",
+              ...report.changed.map((entry) => `- **${entry.broker}**: ${entry.url}`),
+              "",
+              `Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            ].join("\n");
+            await github.rest.issues.create({
+              ...context.repo, title: "API watch: broker docs changed", body, labels: ["api-watch"],
+            });

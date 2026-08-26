@@ -1,0 +1,54 @@
+{
+  "broker": "etrade",
+  "description": "OAuth 1.0a bring-your-own-app: equity comes from the real-time balance, only Bought/Sold transactions become trades, zero-quantity positions drop out.",
+  "raw": {
+    "accounts": [
+      {
+        "accountIdKey": "abc123key",
+        "accountId": "840123456",
+        "accountDesc": "Individual Brokerage",
+        "balance": { "BalanceResponse": { "Computed": { "RealTimeValues": { "totalAccountValue": 45250.75 } } } },
+        "portfolio": {
+          "PortfolioResponse": {
+            "AccountPortfolio": [
+              {
+                "Position": [
+                  { "quantity": 10, "marketValue": 1890.5, "Product": { "symbol": "AAPL" } },
+                  { "quantity": 0, "Product": { "symbol": "GONE" } }
+                ]
+              }
+            ]
+          }
+        },
+        "transactions": [
+          {
+            "transactionType": "Bought",
+            "transactionDate": 1735689600000,
+            "fee": 0.5,
+            "brokerage": { "quantity": 10, "price": 180, "product": { "symbol": "AAPL" } }
+          },
+          { "transactionType": "Dividend", "brokerage": {} }
+        ]
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "abc123key",
+      "name": "Individual Brokerage",
+      "currency": "USD",
+      "equity": 45250.75,
+      "positions": [{ "symbol": "AAPL", "quantity": 10, "marketValue": 1890.5 }],
+      "trades": [
+        {
+          "symbol": "AAPL",
+          "side": "buy",
+          "quantity": 10,
+          "price": 180,
+          "fee": 0.5,
+          "executedAt": "2025-01-01T00:00:00.000Z"
+        }
+      ]
+    }
+  ]
+}

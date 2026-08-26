@@ -1,0 +1,5 @@
+# Legal and release-critical files require LuxAlgo review.
+/LICENSE @alexgrover @smack369
+/TRADEMARKS.md @alexgrover @smack369
+/.github/workflows/ @alexgrover @smack369
+/.github/CODEOWNERS @alexgrover @smack369

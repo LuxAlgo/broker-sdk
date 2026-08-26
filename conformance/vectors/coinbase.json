@@ -1,0 +1,25 @@
+{
+  "broker": "coinbase",
+  "description": "OAuth2 bring-your-own-app: wallet balances valued via the public USD exchange rates (units per USD, so value = quantity ÷ rate); USD wallets are cash, coins are crypto, zero balances drop out.",
+  "raw": {
+    "accounts": [
+      { "id": "acc-1", "name": "BTC Wallet", "balance": { "amount": "0.5", "currency": "BTC" } },
+      { "id": "acc-2", "name": "USD Wallet", "balance": { "amount": "120", "currency": "USD" } },
+      { "id": "acc-3", "name": "ETH Wallet", "balance": { "amount": "0", "currency": "ETH" } }
+    ],
+    "usdRates": { "BTC": 0.0000152587890625, "ETH": 0.0004 }
+  },
+  "expected": [
+    {
+      "id": "coinbase-portfolio",
+      "name": "Coinbase",
+      "currency": "USD",
+      "equity": 32888,
+      "positions": [
+        { "symbol": "BTC", "quantity": 0.5, "marketValue": 32768, "assetClass": "crypto" },
+        { "symbol": "USD", "quantity": 120, "marketValue": 120, "assetClass": "cash" }
+      ],
+      "trades": []
+    }
+  ]
+}

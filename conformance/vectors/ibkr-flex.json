@@ -1,0 +1,43 @@
+{
+  "broker": "ibkr-flex",
+  "description": "Flex XML statement: sells arrive as negative quantities with the side in buySell, commissions arrive negative, equity sums marked positions plus BASE_SUMMARY ending cash.",
+  "raw": {
+    "statementXml": "<FlexQueryResponse queryName=\"brokers\" type=\"AF\"><FlexStatements count=\"1\"><FlexStatement accountId=\"U1234567\" fromDate=\"20260701\" toDate=\"20260815\"><Trades><Trade symbol=\"AAPL\" buySell=\"BUY\" quantity=\"10\" tradePrice=\"150\" ibCommission=\"-1\" dateTime=\"20260805;103000\" /><Trade symbol=\"AAPL\" buySell=\"SELL\" quantity=\"-4\" tradePrice=\"155\" ibCommission=\"-1\" dateTime=\"20260810;140000\" /><Trade symbol=\"BAD\" buySell=\"HOLD\" quantity=\"1\" tradePrice=\"10\" /></Trades><OpenPositions><OpenPosition symbol=\"AAPL\" assetCategory=\"STK\" position=\"6\" markPrice=\"155\" costBasisPrice=\"150\" /></OpenPositions><CashReport><CashReportCurrency currency=\"BASE_SUMMARY\" endingCash=\"500\" /><CashReportCurrency currency=\"USD\" endingCash=\"500\" /></CashReport></FlexStatement></FlexStatements></FlexQueryResponse>"
+  },
+  "expected": [
+    {
+      "id": "U1234567",
+      "name": "Interactive Brokers U1234567",
+      "currency": "USD",
+      "equity": 1430,
+      "cash": 500,
+      "positions": [
+        {
+          "symbol": "AAPL",
+          "quantity": 6,
+          "marketValue": 930,
+          "averageEntryPrice": 150,
+          "assetClass": "equity"
+        }
+      ],
+      "trades": [
+        {
+          "symbol": "AAPL",
+          "side": "buy",
+          "quantity": 10,
+          "price": 150,
+          "fee": 1,
+          "executedAt": "2026-08-05T10:30:00.000Z"
+        },
+        {
+          "symbol": "AAPL",
+          "side": "sell",
+          "quantity": 4,
+          "price": 155,
+          "fee": 1,
+          "executedAt": "2026-08-10T14:00:00.000Z"
+        }
+      ]
+    }
+  ]
+}

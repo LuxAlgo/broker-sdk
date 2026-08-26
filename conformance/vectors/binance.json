@@ -1,0 +1,61 @@
+{
+  "broker": "binance",
+  "description": "Spot balances valued via public USDT tickers: stables at face value, priced coins at last price, zero balances dropped, unpriced coins kept without a value.",
+  "raw": {
+    "account": {
+      "balances": [
+        {
+          "asset": "BTC",
+          "free": "0.5",
+          "locked": "0"
+        },
+        {
+          "asset": "USDT",
+          "free": "100",
+          "locked": "0"
+        },
+        {
+          "asset": "MYSTERY",
+          "free": "10",
+          "locked": "0"
+        },
+        {
+          "asset": "DUST",
+          "free": "0",
+          "locked": "0"
+        }
+      ]
+    },
+    "usdtPrices": {
+      "BTC": 60000
+    }
+  },
+  "expected": [
+    {
+      "id": "binance-spot",
+      "name": "Binance spot",
+      "currency": "USD",
+      "equity": 30100,
+      "positions": [
+        {
+          "symbol": "BTC",
+          "quantity": 0.5,
+          "marketValue": 30000,
+          "assetClass": "crypto"
+        },
+        {
+          "symbol": "USDT",
+          "quantity": 100,
+          "marketValue": 100,
+          "assetClass": "crypto"
+        },
+        {
+          "symbol": "MYSTERY",
+          "quantity": 10,
+          "assetClass": "crypto"
+        }
+      ],
+      "trades": []
+    }
+  ]
+}

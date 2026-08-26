@@ -1,0 +1,54 @@
+{
+  "broker": "bybit",
+  "description": "Unified account wallet balance: per-coin USD valuations come straight from Bybit, account equity prefers totalEquity over the position sum.",
+  "raw": {
+    "retCode": 0,
+    "retMsg": "OK",
+    "result": {
+      "list": [
+        {
+          "totalEquity": "1234.5",
+          "coin": [
+            {
+              "coin": "BTC",
+              "walletBalance": "0.02",
+              "usdValue": "1200"
+            },
+            {
+              "coin": "USDC",
+              "walletBalance": "34.5",
+              "usdValue": "34.5"
+            },
+            {
+              "coin": "ZERO",
+              "walletBalance": "0"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "expected": [
+    {
+      "id": "bybit-unified",
+      "name": "Bybit unified",
+      "currency": "USD",
+      "equity": 1234.5,
+      "positions": [
+        {
+          "symbol": "BTC",
+          "quantity": 0.02,
+          "marketValue": 1200,
+          "assetClass": "crypto"
+        },
+        {
+          "symbol": "USDC",
+          "quantity": 34.5,
+          "marketValue": 34.5,
+          "assetClass": "crypto"
+        }
+      ],
+      "trades": []
+    }
+  ]
+}

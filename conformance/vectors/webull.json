@@ -1,0 +1,23 @@
+{
+  "broker": "webull",
+  "description": "OpenAPI response envelopes vary — the balance record and the positions list are hunted for under known keys; positions carry snake_case fields here.",
+  "raw": {
+    "accounts": [
+      {
+        "accountId": "W123456",
+        "balance": { "total_asset": "9800.12" },
+        "positions": { "data": [{ "symbol": "TSLA", "quantity": 3, "market_value": 750 }] }
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "W123456",
+      "name": "Webull W123456",
+      "currency": "USD",
+      "equity": 9800.12,
+      "positions": [{ "symbol": "TSLA", "quantity": 3, "marketValue": 750 }],
+      "trades": []
+    }
+  ]
+}

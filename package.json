@@ -1,0 +1,89 @@
+{
+  "name": "@luxalgo/broker-sdk",
+  "version": "0.3.0",
+  "description": "Open-source broker connectivity for code, apps, and AI agents. 16 brokers, one normalized schema, zero dependencies. Your keys never leave your machine.",
+  "license": "MIT",
+  "author": "LuxAlgo Global, LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LuxAlgo/broker-sdk.git"
+  },
+  "homepage": "https://github.com/LuxAlgo/broker-sdk#readme",
+  "bugs": "https://github.com/LuxAlgo/broker-sdk/issues",
+  "keywords": [
+    "broker",
+    "brokerage",
+    "trading",
+    "portfolio",
+    "alpaca",
+    "binance",
+    "kraken",
+    "bybit",
+    "okx",
+    "hyperliquid",
+    "tradier",
+    "ibkr",
+    "mcp",
+    "ai-agents"
+  ],
+  "type": "module",
+  "engines": {
+    "node": ">=18.17"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "conformance/vectors"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./adapters": {
+      "types": "./dist/adapters/index.d.ts",
+      "import": "./dist/adapters/index.js",
+      "require": "./dist/adapters/index.cjs"
+    },
+    "./stats": {
+      "types": "./dist/stats.d.ts",
+      "import": "./dist/stats.js",
+      "require": "./dist/stats.cjs"
+    },
+    "./csv": {
+      "types": "./dist/csv.d.ts",
+      "import": "./dist/csv.js",
+      "require": "./dist/csv.cjs"
+    },
+    "./orders": {
+      "types": "./dist/orders.d.ts",
+      "import": "./dist/orders.js",
+      "require": "./dist/orders.cjs"
+    },
+    "./fx": {
+      "types": "./dist/fx.d.ts",
+      "import": "./dist/fx.js",
+      "require": "./dist/fx.cjs"
+    },
+    "./conformance/vectors/*.json": "./conformance/vectors/*.json",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm run test",
+    "prepublishOnly": "npm run check && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.0"
+  }
+}

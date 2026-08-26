@@ -1,0 +1,108 @@
+{
+  "broker": "alpaca",
+  "description": "Paper account with one priced position and mixed-quality fills: bad rows (short side, empty symbol, zero qty, unparsable price) drop out instead of being guessed at.",
+  "raw": {
+    "environment": "paper",
+    "account": {
+      "account_number": "PA1234567",
+      "equity": "10500.25",
+      "currency": "USD",
+      "cash": "2500"
+    },
+    "positions": [
+      {
+        "symbol": "NVDA",
+        "qty": "5",
+        "market_value": "600.5",
+        "asset_class": "us_equity",
+        "avg_entry_price": "110.25"
+      },
+      {
+        "symbol": "",
+        "qty": "1",
+        "market_value": "10"
+      },
+      {
+        "symbol": "AAPL",
+        "qty": "0"
+      }
+    ],
+    "fills": [
+      {
+        "activity_type": "FILL",
+        "side": "buy",
+        "symbol": "NVDA",
+        "qty": "5",
+        "price": "120.5",
+        "transaction_time": "2026-08-01T14:30:00Z"
+      },
+      {
+        "activity_type": "FILL",
+        "side": "sell",
+        "symbol": "NVDA",
+        "qty": "2",
+        "price": "130",
+        "transaction_time": "2026-08-10T14:30:00Z"
+      },
+      {
+        "side": "sell_short",
+        "symbol": "TSLA",
+        "qty": "1",
+        "price": "200"
+      },
+      {
+        "side": "buy",
+        "symbol": "",
+        "qty": "1",
+        "price": "200"
+      },
+      {
+        "side": "buy",
+        "symbol": "TSLA",
+        "qty": "0",
+        "price": "200"
+      },
+      {
+        "side": "buy",
+        "symbol": "TSLA",
+        "qty": "1",
+        "price": "not-a-number"
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "PA1234567",
+      "name": "Alpaca PA1234567",
+      "currency": "USD",
+      "equity": 10500.25,
+      "cash": 2500,
+      "environment": "paper",
+      "positions": [
+        {
+          "symbol": "NVDA",
+          "quantity": 5,
+          "marketValue": 600.5,
+          "averageEntryPrice": 110.25,
+          "assetClass": "equity"
+        }
+      ],
+      "trades": [
+        {
+          "symbol": "NVDA",
+          "side": "buy",
+          "quantity": 5,
+          "price": 120.5,
+          "executedAt": "2026-08-01T14:30:00.000Z"
+        },
+        {
+          "symbol": "NVDA",
+          "side": "sell",
+          "quantity": 2,
+          "price": 130,
+          "executedAt": "2026-08-10T14:30:00.000Z"
+        }
+      ]
+    }
+  ]
+}

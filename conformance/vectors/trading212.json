@@ -1,0 +1,45 @@
+{
+  "broker": "trading212",
+  "description": "Tickers like AAPL_US_EQ normalize to the plain symbol; position value derives from quantity × currentPrice; free cash lands in cash.",
+  "raw": {
+    "info": {
+      "currencyCode": "EUR",
+      "id": 555
+    },
+    "cash": {
+      "total": 2000.5,
+      "free": 800
+    },
+    "portfolio": [
+      {
+        "ticker": "AAPL_US_EQ",
+        "quantity": 2,
+        "currentPrice": 190.25,
+        "averagePrice": 180.1
+      },
+      {
+        "ticker": "GONE_US_EQ",
+        "quantity": 0
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "trading212-555",
+      "name": "Trading212",
+      "currency": "EUR",
+      "equity": 2000.5,
+      "cash": 800,
+      "positions": [
+        {
+          "symbol": "AAPL",
+          "quantity": 2,
+          "marketValue": 380.5,
+          "averageEntryPrice": 180.1,
+          "assetClass": "equity"
+        }
+      ],
+      "trades": []
+    }
+  ]
+}
