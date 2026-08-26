@@ -20,7 +20,7 @@ Extend the SDK beyond reading accounts to placing, tracking, and canceling order
 2. **Paper first, per broker.** A broker's write support ships against its paper/sandbox environment and soaks there before live enablement is even designed for it.
 3. **Live trading requires explicit, unmistakable opt-in** (future): a construction-time acknowledgement (e.g. `acknowledgeLiveTrading: "I understand this places real orders with real money"`), never a boolean, never a default, never inheritable from config files.
 4. **Idempotency everywhere.** Every broker adapter must support a client order id or equivalent dedupe mechanism; automated callers are pushed toward it in docs and types.
-5. **No agent surface by default.** `broker-mcp` stays read-only. If an agent-facing trading MCP ever ships, it is a separate package with human-confirmation tooling, not a flag on the read server.
+5. **No agent surface by default.** The broker tools in [`@luxalgo/mcp`](https://github.com/LuxAlgo/luxalgo-mcp-server) stay read-only. If an agent-facing trading MCP ever ships, it is a separate package with human-confirmation tooling, not a flag on the read tools.
 6. **Never guess semantics.** Ambiguous broker order states map to conservative normalized states; anything unknown is `pending`, not `filled`.
 
 ## Broker rollout order (proposed)
