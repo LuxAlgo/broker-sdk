@@ -1,0 +1,36 @@
+{
+  "broker": "gemini",
+  "description": "Balances only: USD folds into cash (equity = cash, nothing else is priced), lowercase currencies uppercase, non-USD fiat stays an unpriced cash-class position, zero and malformed rows (no currency / non-numeric amount) drop out; trades stay empty because /v1/mytrades needs a symbol.",
+  "raw": {
+    "balances": [
+      { "currency": "btc", "amount": "0.25", "available": "0.2" },
+      { "currency": "USD", "amount": "1200.5", "available": "1000" },
+      { "currency": "eth", "amount": "0", "available": "0" },
+      { "amount": "5", "available": "5" },
+      { "currency": "DOGE", "amount": "not-a-number" },
+      { "currency": "GBP", "amount": "50", "available": "50" }
+    ]
+  },
+  "expected": [
+    {
+      "id": "gemini-exchange",
+      "name": "Gemini exchange",
+      "currency": "USD",
+      "equity": 1200.5,
+      "cash": 1200.5,
+      "positions": [
+        {
+          "symbol": "BTC",
+          "quantity": 0.25,
+          "assetClass": "crypto"
+        },
+        {
+          "symbol": "GBP",
+          "quantity": 50,
+          "assetClass": "cash"
+        }
+      ],
+      "trades": []
+    }
+  ]
+}

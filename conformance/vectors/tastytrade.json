@@ -1,0 +1,191 @@
+{
+  "broker": "tastytrade",
+  "description": "maps per-account balances/positions/transactions: quantity signed by quantity-direction, marketValue = quantity * close-price only when close-price parses, instrument-type asset classes incl. option/futures/crypto, skips symbol-less and zero-quantity positions and account-number-less entries; Trade transactions map Buy*/Sell* actions to sides, keep a zero commission but drop a negative one, and normalize executed-at offsets to Z",
+  "raw": {
+    "accounts": [
+      {
+        "accountNumber": "5WT00001",
+        "balances": {
+          "net-liquidating-value": "43521.19",
+          "cash-balance": "12010.55",
+          "currency": "USD"
+        },
+        "positions": [
+          {
+            "symbol": "AAPL",
+            "quantity": "25",
+            "quantity-direction": "Long",
+            "close-price": "232.50",
+            "average-open-price": "198.40",
+            "instrument-type": "Equity"
+          },
+          {
+            "symbol": "SPY   260618P00520000",
+            "quantity": "2",
+            "quantity-direction": "Short",
+            "close-price": "3.25",
+            "average-open-price": "4.10",
+            "instrument-type": "Equity Option"
+          },
+          {
+            "symbol": "BTC/USD",
+            "quantity": "0.25",
+            "quantity-direction": "Long",
+            "close-price": "not-a-price",
+            "average-open-price": "64100.0",
+            "instrument-type": "Cryptocurrency"
+          },
+          {
+            "quantity": "10",
+            "quantity-direction": "Long",
+            "close-price": "5.0",
+            "instrument-type": "Equity"
+          },
+          {
+            "symbol": "FLAT",
+            "quantity": "0",
+            "quantity-direction": "Long",
+            "close-price": "10.0",
+            "instrument-type": "Equity"
+          }
+        ],
+        "transactions": [
+          {
+            "transaction-type": "Trade",
+            "action": "Buy to Open",
+            "symbol": "AAPL",
+            "quantity": "25",
+            "price": "198.40",
+            "commission": "0.0",
+            "executed-at": "2026-08-20T14:31:22.123+00:00"
+          },
+          {
+            "transaction-type": "Trade",
+            "action": "Sell to Close",
+            "symbol": "NVDA",
+            "quantity": "10",
+            "price": "131.25",
+            "commission": "1.0",
+            "executed-at": "2026-08-24T18:05:09+00:00"
+          },
+          {
+            "transaction-type": "Money Movement",
+            "action": "Deposit",
+            "quantity": "0",
+            "price": "0"
+          },
+          {
+            "transaction-type": "Trade",
+            "action": "Sell to Open",
+            "symbol": "IWM",
+            "quantity": "5",
+            "price": "210.50",
+            "commission": "-2.0"
+          },
+          {
+            "transaction-type": "Trade",
+            "action": "Buy to Open",
+            "symbol": "QQQ",
+            "quantity": "5",
+            "price": "bogus",
+            "executed-at": "2026-08-25T10:00:00+00:00"
+          }
+        ]
+      },
+      {
+        "accountNumber": "5WT00002",
+        "balances": {
+          "net-liquidating-value": "2150.0",
+          "cash-balance": "650.0",
+          "currency": "USD"
+        },
+        "positions": [
+          {
+            "symbol": "/MESU6",
+            "quantity": "1",
+            "quantity-direction": "Long",
+            "average-open-price": "5730.25",
+            "instrument-type": "Future"
+          }
+        ],
+        "transactions": []
+      },
+      {
+        "balances": { "net-liquidating-value": "1.0" },
+        "positions": [],
+        "transactions": []
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "5WT00001",
+      "name": "tastytrade 5WT00001",
+      "currency": "USD",
+      "equity": 43521.19,
+      "cash": 12010.55,
+      "positions": [
+        {
+          "symbol": "AAPL",
+          "quantity": 25,
+          "marketValue": 5812.5,
+          "averageEntryPrice": 198.4,
+          "assetClass": "equity"
+        },
+        {
+          "symbol": "SPY   260618P00520000",
+          "quantity": -2,
+          "marketValue": -6.5,
+          "averageEntryPrice": 4.1,
+          "assetClass": "option"
+        },
+        {
+          "symbol": "BTC/USD",
+          "quantity": 0.25,
+          "averageEntryPrice": 64100,
+          "assetClass": "crypto"
+        }
+      ],
+      "trades": [
+        {
+          "symbol": "AAPL",
+          "side": "buy",
+          "quantity": 25,
+          "price": 198.4,
+          "fee": 0,
+          "executedAt": "2026-08-20T14:31:22.123Z"
+        },
+        {
+          "symbol": "NVDA",
+          "side": "sell",
+          "quantity": 10,
+          "price": 131.25,
+          "fee": 1,
+          "executedAt": "2026-08-24T18:05:09.000Z"
+        },
+        {
+          "symbol": "IWM",
+          "side": "sell",
+          "quantity": 5,
+          "price": 210.5
+        }
+      ]
+    },
+    {
+      "id": "5WT00002",
+      "name": "tastytrade 5WT00002",
+      "currency": "USD",
+      "equity": 2150,
+      "cash": 650,
+      "positions": [
+        {
+          "symbol": "/MESU6",
+          "quantity": 1,
+          "averageEntryPrice": 5730.25,
+          "assetClass": "futures"
+        }
+      ],
+      "trades": []
+    }
+  ]
+}

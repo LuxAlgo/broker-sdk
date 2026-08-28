@@ -1,4 +1,5 @@
 import { connectAlpacaTrading, type AlpacaTradingOptions } from "./orders/alpaca.js";
+import { connectBinanceTrading, type BinanceTradingOptions } from "./orders/binance.js";
 import { connectTradierTrading, type TradierTradingOptions } from "./orders/tradier.js";
 import { BrokerError } from "./errors.js";
 import type { TradingConnection } from "./orders/types.js";
@@ -34,6 +35,7 @@ export { normalizeTradierOrder } from "./orders/tradier.js";
 
 export type TradingConnectOptions =
   | ({ broker: "alpaca" } & AlpacaTradingOptions)
+  | ({ broker: "binance" } & BinanceTradingOptions)
   | ({ broker: "tradier" } & TradierTradingOptions);
 
 /**
@@ -42,6 +44,8 @@ export type TradingConnectOptions =
  * - `alpaca`: paper keys connect directly; live keys additionally require
  *   `acknowledgeLiveTrading` set to the exact `LIVE_TRADING_ACKNOWLEDGEMENT`
  *   sentence.
+ * - `binance`: Spot Testnet only — the connection is pinned to
+ *   testnet.binance.vision, so live orders are impossible by construction.
  * - `tradier`: sandbox only — the connection is pinned to the sandbox host,
  *   so live orders are impossible by construction.
  */
@@ -49,9 +53,11 @@ export const connectTrading = (options: TradingConnectOptions): TradingConnectio
   switch (options.broker) {
     case "alpaca":
       return connectAlpacaTrading(options);
+    case "binance":
+      return connectBinanceTrading(options);
     case "tradier":
       return connectTradierTrading(options);
     default:
-      throw new BrokerError(String((options as { broker: string }).broker), "Order placement supports alpaca and tradier (sandbox) so far — see docs/orders-rfc.md for the rollout");
+      throw new BrokerError(String((options as { broker: string }).broker), "Order placement supports alpaca, binance (Spot Testnet), and tradier (sandbox) so far — see docs/orders-rfc.md for the rollout");
   }
 };

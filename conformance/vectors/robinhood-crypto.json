@@ -1,0 +1,69 @@
+{
+  "broker": "robinhood-crypto",
+  "description": "maps buying power to cash-only equity (holdings are unpriced by these endpoints, so no marketValue), keeps positive-quantity holdings as crypto positions while skipping zero-quantity and code-less rows, and maps filled orders to trades (base of the BTC-USD pair, updated_at preferred over created_at) while dropping non-filled and side-less rows",
+  "raw": {
+    "account": {
+      "account_number": "RHC-0001",
+      "status": "active",
+      "buying_power": "512.25",
+      "buying_power_currency": "USD"
+    },
+    "holdings": [
+      { "asset_code": "BTC", "total_quantity": "0.5", "quantity_available_for_trading": "0.5" },
+      { "asset_code": "ETH", "total_quantity": "2", "quantity_available_for_trading": "1.5" },
+      { "asset_code": "DOGE", "total_quantity": "0", "quantity_available_for_trading": "0" },
+      { "total_quantity": "3.25", "quantity_available_for_trading": "3.25" }
+    ],
+    "orders": [
+      {
+        "symbol": "BTC-USD",
+        "side": "buy",
+        "state": "filled",
+        "filled_asset_quantity": "0.1",
+        "average_price": "65000.5",
+        "created_at": "2026-08-21T10:00:00Z"
+      },
+      {
+        "symbol": "ETH-USD",
+        "side": "sell",
+        "state": "filled",
+        "filled_asset_quantity": "1",
+        "average_price": "3200",
+        "created_at": "2026-08-22T09:29:58Z",
+        "updated_at": "2026-08-22T09:30:00.500Z"
+      },
+      {
+        "symbol": "SOL-USD",
+        "side": "buy",
+        "state": "canceled",
+        "filled_asset_quantity": "0",
+        "average_price": "150",
+        "created_at": "2026-08-23T12:00:00Z"
+      },
+      {
+        "symbol": "BTC-USD",
+        "state": "filled",
+        "filled_asset_quantity": "0.2",
+        "average_price": "64000",
+        "created_at": "2026-08-24T15:00:00Z"
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "robinhood-crypto-RHC-0001",
+      "name": "Robinhood Crypto",
+      "currency": "USD",
+      "equity": 512.25,
+      "cash": 512.25,
+      "positions": [
+        { "symbol": "BTC", "quantity": 0.5, "assetClass": "crypto" },
+        { "symbol": "ETH", "quantity": 2, "assetClass": "crypto" }
+      ],
+      "trades": [
+        { "symbol": "BTC", "side": "buy", "quantity": 0.1, "price": 65000.5, "executedAt": "2026-08-21T10:00:00.000Z" },
+        { "symbol": "ETH", "side": "sell", "quantity": 1, "price": 3200, "executedAt": "2026-08-22T09:30:00.500Z" }
+      ]
+    }
+  ]
+}

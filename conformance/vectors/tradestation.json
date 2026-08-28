@@ -1,0 +1,118 @@
+{
+  "broker": "tradestation",
+  "description": "joins Accounts with the comma-batched Balances and Positions lists by AccountID: signed Quantity for shorts, AssetType map (STOCK/STOCKOPTION/INDEXOPTION/FUTURE), currency from the account, skips symbol-less and zero-quantity rows, drops positions for unknown accounts and account entries without an AccountID; trades always empty (no v3 read-scope fills endpoint)",
+  "raw": {
+    "accounts": [
+      { "AccountID": "11111111", "Currency": "USD", "AccountType": "Margin" },
+      { "AccountID": "SIM22222F", "Currency": "USD", "AccountType": "Futures" },
+      { "Currency": "USD", "AccountType": "Cash" }
+    ],
+    "balances": [
+      { "AccountID": "11111111", "Equity": "31250.75", "CashBalance": "5400.25" },
+      { "AccountID": "SIM22222F", "Equity": "9875.50" }
+    ],
+    "positions": [
+      {
+        "AccountID": "11111111",
+        "Symbol": "MSFT",
+        "Quantity": "40",
+        "MarketValue": "17300.00",
+        "AveragePrice": "401.25",
+        "AssetType": "STOCK"
+      },
+      {
+        "AccountID": "11111111",
+        "Symbol": "MSFT 260320C450",
+        "Quantity": "-3",
+        "MarketValue": "-1935.00",
+        "AveragePrice": "7.50",
+        "AssetType": "STOCKOPTION"
+      },
+      {
+        "AccountID": "11111111",
+        "Quantity": "10",
+        "MarketValue": "100.00",
+        "AssetType": "STOCK"
+      },
+      {
+        "AccountID": "SIM22222F",
+        "Symbol": "ESU26",
+        "Quantity": "2",
+        "MarketValue": "12500.00",
+        "AveragePrice": "6225.25",
+        "AssetType": "FUTURE"
+      },
+      {
+        "AccountID": "SIM22222F",
+        "Symbol": "SPXW 260828P6400",
+        "Quantity": "1",
+        "MarketValue": "512.50",
+        "AveragePrice": "4.80",
+        "AssetType": "INDEXOPTION"
+      },
+      {
+        "AccountID": "SIM22222F",
+        "Symbol": "FLAT",
+        "Quantity": "0",
+        "MarketValue": "0.00",
+        "AssetType": "STOCK"
+      },
+      {
+        "AccountID": "99999999",
+        "Symbol": "GHOST",
+        "Quantity": "1",
+        "MarketValue": "1.00",
+        "AssetType": "STOCK"
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "11111111",
+      "name": "TradeStation 11111111",
+      "currency": "USD",
+      "equity": 31250.75,
+      "cash": 5400.25,
+      "positions": [
+        {
+          "symbol": "MSFT",
+          "quantity": 40,
+          "marketValue": 17300,
+          "averageEntryPrice": 401.25,
+          "assetClass": "equity"
+        },
+        {
+          "symbol": "MSFT 260320C450",
+          "quantity": -3,
+          "marketValue": -1935,
+          "averageEntryPrice": 7.5,
+          "assetClass": "option"
+        }
+      ],
+      "trades": []
+    },
+    {
+      "id": "SIM22222F",
+      "name": "TradeStation SIM22222F",
+      "currency": "USD",
+      "equity": 9875.5,
+      "positions": [
+        {
+          "symbol": "ESU26",
+          "quantity": 2,
+          "marketValue": 12500,
+          "averageEntryPrice": 6225.25,
+          "assetClass": "futures"
+        },
+        {
+          "symbol": "SPXW 260828P6400",
+          "quantity": 1,
+          "marketValue": 512.5,
+          "averageEntryPrice": 4.8,
+          "assetClass": "option"
+        }
+      ],
+      "trades": []
+    }
+  ]
+}

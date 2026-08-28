@@ -1,0 +1,73 @@
+{
+  "broker": "kucoin",
+  "description": "Balances aggregate per currency across main/trade wallets; USDT/USDC fold into cash stated in USDT (equity = cash, holdings stay unpriced), zero and malformed rows drop out; fills split BTC-USDT style pairs to the base symbol, convert epoch-ms createdAt to ISO, omit zero fees, and skip rows with an unknown side.",
+  "raw": {
+    "accounts": [
+      { "currency": "BTC", "type": "trade", "balance": "0.5", "available": "0.5" },
+      { "currency": "BTC", "type": "main", "balance": "0.25", "available": "0.25" },
+      { "currency": "USDT", "type": "trade", "balance": "1500", "available": "1200" },
+      { "currency": "USDC", "type": "main", "balance": "250.5", "available": "250.5" },
+      { "currency": "ETH", "type": "trade", "balance": "0", "available": "0" },
+      { "type": "main", "balance": "42" },
+      { "currency": "SOL", "type": "trade", "balance": "not-a-number" }
+    ],
+    "fills": [
+      {
+        "symbol": "BTC-USDT",
+        "side": "buy",
+        "size": "0.1",
+        "price": "50000",
+        "fee": "5",
+        "createdAt": 1735689600000
+      },
+      {
+        "symbol": "ETH-USDT",
+        "side": "sell",
+        "size": "2",
+        "price": "2500",
+        "fee": "0",
+        "createdAt": 1755710445123
+      },
+      {
+        "symbol": "DOGE-USDT",
+        "side": "hold",
+        "size": "10",
+        "price": "0.1",
+        "createdAt": 1735689600000
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "kucoin",
+      "name": "KuCoin",
+      "currency": "USDT",
+      "equity": 1750.5,
+      "cash": 1750.5,
+      "positions": [
+        {
+          "symbol": "BTC",
+          "quantity": 0.75,
+          "assetClass": "crypto"
+        }
+      ],
+      "trades": [
+        {
+          "symbol": "BTC",
+          "side": "buy",
+          "quantity": 0.1,
+          "price": 50000,
+          "fee": 5,
+          "executedAt": "2025-01-01T00:00:00.000Z"
+        },
+        {
+          "symbol": "ETH",
+          "side": "sell",
+          "quantity": 2,
+          "price": 2500,
+          "executedAt": "2025-08-20T17:20:45.123Z"
+        }
+      ]
+    }
+  ]
+}
