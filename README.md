@@ -23,9 +23,9 @@
 
 <p align="center"><sub>Broker SDK is a <a href="https://www.luxalgo.com">LuxAlgo</a> open-source project. Official repository: <a href="https://github.com/LuxAlgo/broker-sdk">github.com/LuxAlgo/broker-sdk</a></sub></p>
 
-**Open-source broker connectivity for code, apps, and AI agents.** Point it at Alpaca, Binance, Kraken, Interactive Brokers, Hyperliquid, Tradier and more. Get back the same clean picture from every one of them: accounts, balances, positions, trade history, and computed performance stats.
+**Connect code, apps, and AI agents to real brokerage and exchange accounts.** Point it at Alpaca, Binance, Kraken, Interactive Brokers, Hyperliquid, Tradier and more. Get back the same clean picture from every one of them: accounts, balances, positions, trade history, and computed performance stats.
 
-No hosted service in the path. No per-connection fees. No telemetry. This is the connectivity layer that platforms charge for, as an MIT-licensed library.
+It runs where your code runs: no hosted service, no telemetry, and your keys never touch anyone else's servers.
 
 ```bash
 npm install @luxalgo/broker-sdk
