@@ -78,7 +78,26 @@ One broker failing never takes down the sweep: failures come back alongside the 
 
 ## Import any broker statement
 
-No API? Any account at any institution is importable from a trade-history CSV. The parser is tolerant on headers (brokers disagree on column names) and strict on rows (anything unreadable is skipped and counted, never guessed):
+No API? Any account at any institution is importable from its statement file — not just a clean CSV. `/statements` fingerprints the real-world export formats and turns them into the same `Trade` fills every adapter produces:
+
+- **MetaTrader 4/5 statements** — the HTML report that is MetaTrader's only export button (UTF-16LE, hidden cells, `&minus;` entities and all) and MT4 CSV statements. Each closed row becomes an entry fill and an exit fill.
+- **MetaTrader 5 deals tables** — the only trade data in strategy-tester reports, found behind thousands of cancelled orders.
+- **ThinkOrSwim / Schwab account statements** — fills from Account Trade History, fees matched back from Cash Balance by timestamp and symbol; order-history noise is never read.
+- **TradingView strategy-tester trade lists** — both generations; the exit-first row pairs become chronological fills.
+- Anything else falls back to the tolerant generic CSV parser below.
+
+```ts
+import { readFileSync } from "node:fs";
+import { parseStatement } from "@luxalgo/broker-sdk/statements";
+
+// Raw bytes in, fills out. Detection is a hard fingerprint per format;
+// unreadable rows are skipped and counted, never guessed at.
+const { format, trades, skippedRows, issues, account } = parseStatement(readFileSync("statement.html"));
+```
+
+The result is `{ trades, skippedRows, contentHash }` plus the detected `format`, structured `issues` disclosing every skip and assumption, and the account the statement itself disclosed — fills are tagged with it so histories from different accounts are never silently merged. The fills JSON drops straight into [`prop-firm-sim`](https://github.com/LuxAlgo/prop-firm-sim)'s `importTradeHistory` as `{"trades": [...]}`.
+
+The original generic CSV parser is unchanged, both here and at its old address. It is tolerant on headers (brokers disagree on column names) and strict on rows:
 
 ```ts
 import { parseStatementCsv, positionsFromTrades } from "@luxalgo/broker-sdk/csv";
@@ -107,7 +126,7 @@ const positions = positionsFromTrades(trades);
 | Tradier | access token | ✅ |
 | Trading212 | API key | ➖ |
 | Webull (OpenAPI) | App key + secret | ➖ |
-| Any broker via CSV import | a statement file | ✅ |
+| Any broker via statement import | a statement file (MT4/MT5, ThinkOrSwim, TradingView, CSV) | ✅ |
 
 `listBrokers()` returns every adapter with its exact credential fields and a one-line guide to creating the key with **read-only scope**, which is all this SDK ever needs.
 
@@ -144,7 +163,7 @@ Supported: **Alpaca** (paper by default; a live account additionally requires `a
   <img src="https://raw.githubusercontent.com/LuxAlgo/broker-sdk/main/docs/assets/conformance.svg" alt="Adapter architecture: fetchRaw does IO only, normalize is pure, golden vectors gate every adapter" width="100%"/>
 </p>
 
-The schema plus golden test vectors live in [`conformance/vectors/`](conformance/vectors): one per adapter, pairing a raw provider payload with the exact normalized output. Every adapter splits into an IO-only `fetchRaw` and a pure `normalize`, so the mapping of every broker is tested without a network or credentials, and every community adapter must pass the gate before merge.
+The schema plus golden test vectors live in [`conformance/vectors/`](conformance/vectors): one per adapter, pairing a raw provider payload with the exact normalized output. Every adapter splits into an IO-only `fetchRaw` and a pure `normalize`, so the mapping of every broker is tested without a network or credentials, and every community adapter must pass the gate before merge. The statement parsers have the same gate in [`conformance/vectors/statements/`](conformance/vectors/statements): a raw statement file (base64, so UTF-16LE exports survive JSON) paired with the exact fills it must produce.
 
 Two workflows keep the adapters honest in production:
 

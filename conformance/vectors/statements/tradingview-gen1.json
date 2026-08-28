@@ -1,0 +1,39 @@
+{
+  "format": "tradingview",
+  "description": "TradingView list of trades, first generation: exit rows are listed first but fills come out chronological; each leg is one fill (entry on the position's side, exit opposite) tagged with the disclosed placeholder symbol.",
+  "inputBase64": "VHJhZGUgIyxUeXBlLFNpZ25hbCxEYXRlL1RpbWUsUHJpY2UsQ29udHJhY3RzLFByb2ZpdCxQcm9maXQgJSxDdW0uIFByb2ZpdCxDdW0uIFByb2ZpdCAlLFJ1bi11cCxEcmF3ZG93bgoyLEV4aXQgTG9uZyxDbG9zZSBlbnRyeShzKSBvcmRlciBMb25nLDIwMjQtMDYtMDUgMjA6MDAsMS4wOTAwLDEsNTAuMDAsMC40Niw4MC4wMCwwLjczLDYwLjAwLDEwLjAwCjIsRW50cnkgTG9uZyxMb25nLDIwMjQtMDYtMDUgMTY6MDAsMS4wODUwLDEsNTAuMDAsMC40Niw4MC4wMCwwLjczLDYwLjAwLDEwLjAwCjEsRXhpdCBTaG9ydCxDbG9zZSBlbnRyeShzKSBvcmRlciBTaG9ydCwyMDI0LTA2LTA0IDE4OjAwLDEuMDg1MCwxLDMwLjAwLDAuMjgsMzAuMDAsMC4yOCw0MC4wMCw1LjAwCjEsRW50cnkgU2hvcnQsU2hvcnQsMjAyNC0wNi0wNCAxMjowMCwxLjA4ODAsMSwzMC4wMCwwLjI4LDMwLjAwLDAuMjgsNDAuMDAsNS4wMAo=",
+  "expected": {
+    "format": "tradingview",
+    "trades": [
+      {
+        "symbol": "UNKNOWN",
+        "side": "sell",
+        "quantity": 1,
+        "price": 1.088,
+        "executedAt": "2024-06-04T12:00:00.000Z"
+      },
+      {
+        "symbol": "UNKNOWN",
+        "side": "buy",
+        "quantity": 1,
+        "price": 1.085,
+        "executedAt": "2024-06-04T18:00:00.000Z"
+      },
+      {
+        "symbol": "UNKNOWN",
+        "side": "buy",
+        "quantity": 1,
+        "price": 1.085,
+        "executedAt": "2024-06-05T16:00:00.000Z"
+      },
+      {
+        "symbol": "UNKNOWN",
+        "side": "sell",
+        "quantity": 1,
+        "price": 1.09,
+        "executedAt": "2024-06-05T20:00:00.000Z"
+      }
+    ],
+    "skippedRows": 0
+  }
+}

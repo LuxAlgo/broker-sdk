@@ -6,6 +6,7 @@ export default defineConfig({
     "adapters/index": "src/adapters/index.ts",
     stats: "src/stats.ts",
     csv: "src/csv.ts",
+    "statements/index": "src/statements/index.ts",
     orders: "src/orders.ts",
     fx: "src/fx.ts",
   },

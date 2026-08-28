@@ -1,0 +1,51 @@
+{
+  "format": "mt5-deals",
+  "description": "MT5 strategy-tester report: trades come from the Deals table behind the cancelled-order noise; buy/sell deals map one-to-one to fills (a reversal in/out deal stays one fill), volumes render as 'filled / ordered', costs sum into per-fill fees, and the initial-deposit balance deal is skipped.",
+  "inputBase64": "PGh0bWw+PGJvZHk+PHRhYmxlPjx0cj48dGQgY29sc3Bhbj0iMTQiPlN0cmF0ZWd5IFRlc3RlciBSZXBvcnQ8L3RkPjwvdHI+PHRyPjx0ZCBjb2xzcGFuPSIxNCI+T3JkZXJzPC90ZD48L3RyPjx0cj48dGQ+T3BlbiBUaW1lPC90ZD48dGQ+T3JkZXI8L3RkPjx0ZD5TeW1ib2w8L3RkPjx0ZD5UeXBlPC90ZD48dGQ+Vm9sdW1lPC90ZD48dGQ+UHJpY2U8L3RkPjx0ZD5TL0w8L3RkPjx0ZD5UL1A8L3RkPjx0ZD5UaW1lPC90ZD48dGQ+U3RhdGU8L3RkPjx0ZD5Db21tZW50PC90ZD48L3RyPjx0cj48dGQ+MjAyNi4wMS4wMiAwMTowMDowMDwvdGQ+PHRkPjYwMTwvdGQ+PHRkPkVVUlVTRDwvdGQ+PHRkPmJ1eSBsaW1pdDwvdGQ+PHRkPjAuMDYgLyAwLjAwPC90ZD48dGQ+MS4wOTAwMTwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4wLjAwPC90ZD48dGQ+MjAyNi4wMS4wMiAwMTozMDowMDwvdGQ+PHRkPmNhbmNlbGVkPC90ZD48dGQ+PC90ZD48L3RyPjx0cj48dGQ+MjAyNi4wMS4wMiAwMjowMDowMDwvdGQ+PHRkPjYwMjwvdGQ+PHRkPkVVUlVTRDwvdGQ+PHRkPmJ1eSBsaW1pdDwvdGQ+PHRkPjAuMDYgLyAwLjAwPC90ZD48dGQ+MS4wOTAwMjwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4wLjAwPC90ZD48dGQ+MjAyNi4wMS4wMiAwMjozMDowMDwvdGQ+PHRkPmNhbmNlbGVkPC90ZD48dGQ+PC90ZD48L3RyPjx0cj48dGQ+MjAyNi4wMS4wMiAwMzowMDowMDwvdGQ+PHRkPjYwMzwvdGQ+PHRkPkVVUlVTRDwvdGQ+PHRkPmJ1eSBsaW1pdDwvdGQ+PHRkPjAuMDYgLyAwLjAwPC90ZD48dGQ+MS4wOTAwMzwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4wLjAwPC90ZD48dGQ+MjAyNi4wMS4wMiAwMzozMDowMDwvdGQ+PHRkPmNhbmNlbGVkPC90ZD48dGQ+PC90ZD48L3RyPjx0cj48dGQ+MjAyNi4wMS4wMiAwNDowMDowMDwvdGQ+PHRkPjYwNDwvdGQ+PHRkPkVVUlVTRDwvdGQ+PHRkPmJ1eSBsaW1pdDwvdGQ+PHRkPjAuMDYgLyAwLjAwPC90ZD48dGQ+MS4wOTAwNDwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4wLjAwPC90ZD48dGQ+MjAyNi4wMS4wMiAwNDozMDowMDwvdGQ+PHRkPmNhbmNlbGVkPC90ZD48dGQ+PC90ZD48L3RyPjx0cj48dGQ+MjAyNi4wMS4wMiAwNTowMDowMDwvdGQ+PHRkPjYwNTwvdGQ+PHRkPkVVUlVTRDwvdGQ+PHRkPmJ1eSBsaW1pdDwvdGQ+PHRkPjAuMDYgLyAwLjAwPC90ZD48dGQ+MS4wOTAwNTwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4wLjAwPC90ZD48dGQ+MjAyNi4wMS4wMiAwNTozMDowMDwvdGQ+PHRkPmNhbmNlbGVkPC90ZD48dGQ+PC90ZD48L3RyPjx0cj48dGQgY29sc3Bhbj0iMTQiPkRlYWxzPC90ZD48L3RyPjx0cj48dGQ+VGltZTwvdGQ+PHRkPkRlYWw8L3RkPjx0ZD5TeW1ib2w8L3RkPjx0ZD5UeXBlPC90ZD48dGQ+RGlyZWN0aW9uPC90ZD48dGQ+Vm9sdW1lPC90ZD48dGQ+UHJpY2U8L3RkPjx0ZD5PcmRlcjwvdGQ+PHRkPkNvbW1pc3Npb248L3RkPjx0ZD5GZWU8L3RkPjx0ZD5Td2FwPC90ZD48dGQ+UHJvZml0PC90ZD48dGQ+QmFsYW5jZTwvdGQ+PHRkPkNvbW1lbnQ8L3RkPjwvdHI+PHRyPjx0ZD4yMDI2LjAxLjAyIDAwOjAwOjAwPC90ZD48dGQ+MTwvdGQ+PHRkPjwvdGQ+PHRkPmJhbGFuY2U8L3RkPjx0ZD48L3RkPjx0ZD48L3RkPjx0ZD48L3RkPjx0ZD48L3RkPjx0ZD4wLjAwPC90ZD48dGQ+MC4wMDwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4xMDAwMC4wMDwvdGQ+PHRkPjEwMDAwLjAwPC90ZD48dGQ+aW5pdGlhbCBkZXBvc2l0PC90ZD48L3RyPjx0cj48dGQ+MjAyNi4wMS4wMiAxMDowMDowMDwvdGQ+PHRkPjI8L3RkPjx0ZD5FVVJVU0Q8L3RkPjx0ZD5idXk8L3RkPjx0ZD5pbjwvdGQ+PHRkPjAuMDYgLyAwLjA2PC90ZD48dGQ+MS4xMDAwMDwvdGQ+PHRkPjcwMTwvdGQ+PHRkPi0wLjA2PC90ZD48dGQ+MC4wMDwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD48L3RkPjx0ZD48L3RkPjx0ZD48L3RkPjwvdHI+PHRyPjx0ZD4yMDI2LjAxLjAyIDE0OjAwOjAwPC90ZD48dGQ+MzwvdGQ+PHRkPkVVUlVTRDwvdGQ+PHRkPnNlbGw8L3RkPjx0ZD5vdXQ8L3RkPjx0ZD4wLjA2IC8gMC4wNjwvdGQ+PHRkPjEuMTA1MDA8L3RkPjx0ZD43MDI8L3RkPjx0ZD4tMC4wNjwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4tMC4xMDwvdGQ+PHRkPjMwLjAwPC90ZD48dGQ+MTAwMjkuNzg8L3RkPjx0ZD48L3RkPjwvdHI+PHRyPjx0ZD4yMDI2LjAxLjAzIDA5OjAwOjAwPC90ZD48dGQ+NDwvdGQ+PHRkPkVVUlVTRDwvdGQ+PHRkPnNlbGw8L3RkPjx0ZD5pbjwvdGQ+PHRkPjAuMTAgLyAwLjEwPC90ZD48dGQ+MS4xMDgwMDwvdGQ+PHRkPjcwMzwvdGQ+PHRkPi0wLjEwPC90ZD48dGQ+MC4wMDwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD48L3RkPjx0ZD48L3RkPjx0ZD48L3RkPjwvdHI+PHRyPjx0ZD4yMDI2LjAxLjAzIDE1OjAwOjAwPC90ZD48dGQ+NTwvdGQ+PHRkPkVVUlVTRDwvdGQ+PHRkPmJ1eTwvdGQ+PHRkPmluL291dDwvdGQ+PHRkPjAuMTYgLyAwLjE2PC90ZD48dGQ+MS4xMDYwMDwvdGQ+PHRkPjcwNDwvdGQ+PHRkPi0wLjE2PC90ZD48dGQ+MC4wMDwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4yMC4wMDwvdGQ+PHRkPjwvdGQ+PHRkPjwvdGQ+PC90cj48dHI+PHRkPjIwMjYuMDEuMDQgMTE6MDA6MDA8L3RkPjx0ZD42PC90ZD48dGQ+RVVSVVNEPC90ZD48dGQ+c2VsbDwvdGQ+PHRkPm91dDwvdGQ+PHRkPjAuMDYgLyAwLjA2PC90ZD48dGQ+MS4xMDkwMDwvdGQ+PHRkPjcwNTwvdGQ+PHRkPi0wLjA2PC90ZD48dGQ+MC4wMDwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4xOC4wMDwvdGQ+PHRkPjwvdGQ+PHRkPjwvdGQ+PC90cj48L3RhYmxlPjwvYm9keT48L2h0bWw+",
+  "expected": {
+    "format": "mt5-deals",
+    "trades": [
+      {
+        "symbol": "EURUSD",
+        "side": "buy",
+        "quantity": 0.06,
+        "price": 1.1,
+        "fee": 0.06,
+        "executedAt": "2026-01-02T10:00:00.000Z"
+      },
+      {
+        "symbol": "EURUSD",
+        "side": "sell",
+        "quantity": 0.06,
+        "price": 1.105,
+        "fee": 0.16,
+        "executedAt": "2026-01-02T14:00:00.000Z"
+      },
+      {
+        "symbol": "EURUSD",
+        "side": "sell",
+        "quantity": 0.1,
+        "price": 1.108,
+        "fee": 0.1,
+        "executedAt": "2026-01-03T09:00:00.000Z"
+      },
+      {
+        "symbol": "EURUSD",
+        "side": "buy",
+        "quantity": 0.16,
+        "price": 1.106,
+        "fee": 0.16,
+        "executedAt": "2026-01-03T15:00:00.000Z"
+      },
+      {
+        "symbol": "EURUSD",
+        "side": "sell",
+        "quantity": 0.06,
+        "price": 1.109,
+        "fee": 0.06,
+        "executedAt": "2026-01-04T11:00:00.000Z"
+      }
+    ],
+    "skippedRows": 1
+  }
+}
