@@ -23,7 +23,7 @@
 
 <p align="center"><sub>Broker SDK is a <a href="https://www.luxalgo.com">LuxAlgo</a> open-source project. Official repository: <a href="https://github.com/LuxAlgo/broker-sdk">github.com/LuxAlgo/broker-sdk</a></sub></p>
 
-**Connect code, apps, and AI agents to real brokerage and exchange accounts.** Point it at Alpaca, Binance, Kraken, Interactive Brokers, Hyperliquid, Tradier and more. Get back the same clean picture from every one of them: accounts, balances, positions, trade history, and computed performance stats.
+**Connect code, apps, and AI agents to real brokerage and exchange accounts.** Point it at Charles Schwab, Alpaca, Robinhood Crypto, Binance, Kraken, Interactive Brokers and more. Get back the same clean picture from every one of them: accounts, balances, positions, trade history, and computed performance stats.
 
 It runs where your code runs: no hosted service, no telemetry, and your keys never touch anyone else's servers.
 
@@ -94,16 +94,22 @@ const positions = positionsFromTrades(trades);
 | Alpaca (live + paper) | API key + secret | ✅ |
 | Binance | API key + secret (read-only) | ➖ |
 | Bybit | API key + secret (read-only) | ➖ |
+| Charles Schwab | your own OAuth2 app | ✅ |
 | Coinbase | your own OAuth2 app (read scope) | ➖ |
 | Crypto.com Exchange | API key + secret (read-only) | ➖ |
 | E\*TRADE | your own OAuth 1.0a app | ✅ |
+| Gemini | API key + secret (auditor role) | ➖ |
 | Hyperliquid | wallet address only | ✅ |
 | Interactive Brokers (Flex) | Flex token + query ID | ✅ |
 | Kraken | API key + secret ("Query Funds") | ➖ |
+| KuCoin | API key + secret + passphrase (read) | ✅ |
 | OKX | API key + secret + passphrase (read) | ➖ |
 | Public.com | API secret key | ✅ |
 | Questrade | API refresh token | ✅ |
+| Robinhood Crypto | API key + Ed25519 private key | ✅ |
+| tastytrade | login (rotating remember token) | ✅ |
 | Topstep (ProjectX) | username + API key | ✅ |
+| TradeStation | your own OAuth2 app | ➖ |
 | Tradier | access token | ✅ |
 | Trading212 | API key | ➖ |
 | Webull (OpenAPI) | App key + secret | ➖ |
@@ -111,7 +117,7 @@ const positions = positionsFromTrades(trades);
 
 `listBrokers()` returns every adapter with its exact credential fields and a one-line guide to creating the key with **read-only scope**, which is all this SDK ever needs.
 
-**Sanctioned APIs only.** If a broker does not officially support programmatic access for its users, it is not in this repo: no scraping, no reverse-engineered private APIs, ever. That's why you won't find Robinhood here. Brokers reachable only through credentialed aggregators (Plaid-style: Fidelity, Schwab, Chase) can't ship in an open-source library and are out of scope. OAuth brokers where you register your own free developer app (E\*TRADE, Coinbase) are supported bring-your-own-app style; the flow helpers and setup guide live in [docs/byo-oauth.md](docs/byo-oauth.md).
+**Sanctioned APIs only.** If a broker does not officially support programmatic access for its users, it is not in this repo: no scraping, no reverse-engineered private APIs, ever. Brokers reachable only through credentialed aggregators (Plaid-style: Fidelity, Chase, Vanguard) can't ship in an open-source library and are out of scope. The moment a broker opens an official retail API it becomes eligible, which is exactly how Charles Schwab and Robinhood Crypto earned their rows above. OAuth brokers where you register your own free developer app (Charles Schwab, TradeStation, E\*TRADE, Coinbase) are supported bring-your-own-app style; the flow helpers and setup guide live in [docs/byo-oauth.md](docs/byo-oauth.md).
 
 ## Read-only, local-only, by design
 
@@ -136,7 +142,7 @@ const order = await trading.placeOrder({ symbol: "AAPL", side: "buy", type: "lim
 await trading.cancelOrder(order.id);
 ```
 
-Supported: **Alpaca** (paper by default; a live account additionally requires `acknowledgeLiveTrading` set to the exact `LIVE_TRADING_ACKNOWLEDGEMENT` sentence, never a boolean, never a default) and **Tradier** (sandbox only, pinned to the sandbox host so live orders are impossible by construction). Roadmap and full safety posture: [docs/orders-rfc.md](docs/orders-rfc.md).
+Supported: **Alpaca** (paper by default; a live account additionally requires `acknowledgeLiveTrading` set to the exact `LIVE_TRADING_ACKNOWLEDGEMENT` sentence, never a boolean, never a default), **Tradier** (sandbox only, pinned to the sandbox host so live orders are impossible by construction), and **Binance Spot Testnet** (pinned to testnet.binance.vision, live orders impossible by construction). Roadmap and full safety posture: [docs/orders-rfc.md](docs/orders-rfc.md).
 
 ## The conformance kit
 
@@ -164,7 +170,7 @@ Node ≥ 18.17 (built-in `fetch`; `node:crypto` for request signing). Zero runti
 
 ## Contributing
 
-Copy-paste starting points live in [docs/recipes.md](docs/recipes.md); the bring-your-own-app OAuth guide (E\*TRADE, Coinbase) in [docs/byo-oauth.md](docs/byo-oauth.md). Adapter #17 is yours to add, and [CONTRIBUTING.md](CONTRIBUTING.md) walks you through it. The short version: sanctioned user-key APIs only, split fetch/normalize, ship a conformance vector, pass the gate.
+Copy-paste starting points live in [docs/recipes.md](docs/recipes.md); the bring-your-own-app OAuth guide (Charles Schwab, TradeStation, E\*TRADE, Coinbase) in [docs/byo-oauth.md](docs/byo-oauth.md). Adapter #23 is yours to add, and [CONTRIBUTING.md](CONTRIBUTING.md) walks you through it. The short version: sanctioned user-key APIs only, split fetch/normalize, ship a conformance vector, pass the gate.
 
 ## Disclaimer
 

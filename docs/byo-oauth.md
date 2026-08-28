@@ -2,7 +2,7 @@
 
 Some brokers don't hand users an API key — they hand *developers* an OAuth app. These brokers still fit this SDK's rules (sanctioned API, your credentials, no LuxAlgo server), with one extra setup step: **you register your own free developer app** and use its client credentials. Your keys, including the app itself, stay yours.
 
-Status: **shipped.** Both adapters are in the SDK (`etrade`, `coinbase`), with the flow helpers `createEtradeOAuthFlow`, `buildCoinbaseAuthorizeUrl`, and `exchangeCoinbaseCode` exported from `@luxalgo/broker-sdk/adapters`.
+Status: **shipped.** Four adapters use it (`schwab`, `tradestation`, `etrade`, `coinbase`), with flow helpers exported from `@luxalgo/broker-sdk/adapters`: `buildSchwabAuthorizeUrl`/`exchangeSchwabCode`, `buildTradestationAuthorizeUrl`/`exchangeTradestationCode`, `createEtradeOAuthFlow`, and `buildCoinbaseAuthorizeUrl`/`exchangeCoinbaseCode`.
 
 ## How it will work
 
@@ -18,6 +18,18 @@ const url = flow.authorizationUrl();          // send the user here
 const credentials = await flow.exchange(code); // callback code → tokens
 const connection = connect({ broker: "etrade", credentials, onCredentialsRotated: persist });
 ```
+
+## Charles Schwab
+
+1. Register at [developer.schwab.com](https://developer.schwab.com) and create an individual app with the Accounts and Trading Production product (free; approval takes a few days).
+2. Standard OAuth2 authorization-code flow: `buildSchwabAuthorizeUrl` sends the user to Schwab, `exchangeSchwabCode` turns the callback code into tokens.
+3. Access tokens last 30 minutes and refresh automatically through `onCredentialsRotated`. Schwab refresh tokens expire after 7 days and then need a fresh authorize; the SDK surfaces that as an auth error rather than guessing.
+
+## TradeStation
+
+1. Request API access at [tradestation.com/platforms-and-tools/trade-station-api](https://www.tradestation.com/) (developer signup; approval required).
+2. OAuth2 authorization-code flow with `ReadAccount offline_access` scope: `buildTradestationAuthorizeUrl` + `exchangeTradestationCode`.
+3. Refresh tokens are long-lived; access token rotation flows through `onCredentialsRotated`.
 
 ## E*TRADE
 
@@ -35,4 +47,4 @@ const connection = connect({ broker: "etrade", credentials, onCredentialsRotated
 
 ## What will never be here
 
-Aggregator-only institutions (Fidelity, Schwab, Chase…) require the *aggregator's* credentials, not yours — that can't ship in an open-source library, and pretending otherwise would mean scraping. See the README's "sanctioned APIs only" rule.
+Aggregator-only institutions (Fidelity, Chase, Vanguard…) require the *aggregator's* credentials, not yours — that can't ship in an open-source library, and pretending otherwise would mean scraping. See the README's "sanctioned APIs only" rule. (Schwab used to sit on this list; it moved to a real adapter the day its retail API opened. That is the standing offer to every broker here.)
