@@ -1,0 +1,100 @@
+{
+  "broker": "schwab",
+  "description": "maps securitiesAccount balances/positions (long minus short, asset classes incl. option and cash equivalent), skips symbol-less positions and account-less entries, and parses TRADE transferItems into trades while dropping CURRENCY legs and non-TRADE types",
+  "raw": {
+    "accounts": [
+      {
+        "securitiesAccount": {
+          "accountNumber": "12345678",
+          "currentBalances": { "liquidationValue": 24310.88, "cashBalance": 8114.2 },
+          "positions": [
+            {
+              "instrument": { "symbol": "AAPL", "assetType": "EQUITY" },
+              "longQuantity": 10,
+              "shortQuantity": 0,
+              "marketValue": 1855.4,
+              "averagePrice": 172.31
+            },
+            {
+              "instrument": { "symbol": "SPY   250620P00520000", "assetType": "OPTION" },
+              "longQuantity": 0,
+              "shortQuantity": 2,
+              "marketValue": -436,
+              "averagePrice": 2.9
+            },
+            {
+              "instrument": { "symbol": "SWVXX", "assetType": "CASH_EQUIVALENT" },
+              "longQuantity": 8114.2,
+              "shortQuantity": 0,
+              "marketValue": 8114.2,
+              "averagePrice": 1
+            },
+            { "instrument": { "assetType": "EQUITY" }, "longQuantity": 5 }
+          ]
+        }
+      },
+      { "securitiesAccount": {} }
+    ],
+    "transactions": {
+      "12345678": [
+        {
+          "type": "TRADE",
+          "tradeDate": "2026-08-20T14:31:22+0000",
+          "transferItems": [
+            { "instrument": { "symbol": "AAPL", "assetType": "EQUITY" }, "amount": 10, "price": 170.55 },
+            { "instrument": { "symbol": "USD", "assetType": "CURRENCY" }, "amount": -1705.5 }
+          ]
+        },
+        {
+          "type": "TRADE",
+          "tradeDate": "2026-08-22T13:05:00+0000",
+          "transferItems": [
+            { "instrument": { "symbol": "NVDA", "assetType": "EQUITY" }, "amount": -3, "price": 122.4 }
+          ]
+        },
+        {
+          "type": "DIVIDEND_OR_INTEREST",
+          "transferItems": [
+            { "instrument": { "symbol": "AAPL", "assetType": "EQUITY" }, "amount": 2.4, "price": 1 }
+          ]
+        }
+      ]
+    }
+  },
+  "expected": [
+    {
+      "id": "12345678",
+      "name": "Schwab 12345678",
+      "currency": "USD",
+      "equity": 24310.88,
+      "cash": 8114.2,
+      "positions": [
+        {
+          "symbol": "AAPL",
+          "quantity": 10,
+          "marketValue": 1855.4,
+          "averageEntryPrice": 172.31,
+          "assetClass": "equity"
+        },
+        {
+          "symbol": "SPY   250620P00520000",
+          "quantity": -2,
+          "marketValue": -436,
+          "averageEntryPrice": 2.9,
+          "assetClass": "option"
+        },
+        {
+          "symbol": "SWVXX",
+          "quantity": 8114.2,
+          "marketValue": 8114.2,
+          "averageEntryPrice": 1,
+          "assetClass": "cash"
+        }
+      ],
+      "trades": [
+        { "symbol": "AAPL", "side": "buy", "quantity": 10, "price": 170.55, "executedAt": "2026-08-20T14:31:22.000Z" },
+        { "symbol": "NVDA", "side": "sell", "quantity": 3, "price": 122.4, "executedAt": "2026-08-22T13:05:00.000Z" }
+      ]
+    }
+  ]
+}
