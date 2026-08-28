@@ -1,0 +1,56 @@
+{
+  "format": "metatrader",
+  "description": "MT4 account statement CSV: each closed row becomes an entry fill and an opposite-side exit fill carrying the combined commission/taxes/swap as its fee; a pending 'buy limit' and a 'balance' ledger row are skipped and counted.",
+  "inputBase64": "VGlja2V0LE9wZW4gVGltZSxUeXBlLFNpemUsSXRlbSxQcmljZSxTL0wsVC9QLENsb3NlIFRpbWUsUHJpY2UsQ29tbWlzc2lvbixUYXhlcyxTd2FwLFByb2ZpdAoxMDAxLDIwMjYuMDIuMDIgMTA6MTUsYnV5LDAuNTAsRVVSVVNELDEuMDg1MDAsMS4wODAwMCwwLjAwMDAwLDIwMjYuMDIuMDIgMTQ6MzAsMS4wOTAwMCwtMy41MCwwLjAwLC0wLjIwLDI1MC4wMAoxMDAyLDIwMjYuMDIuMDMgMDk6MDAsc2VsbCwwLjUwLEVVUlVTRCwxLjA5MjAwLDEuMDk3MDAsMC4wMDAwMCwyMDI2LjAyLjAzIDExOjQ1LDEuMDk0NTAsLTMuNTAsMC4wMCwwLjAwLC0xMjUuMDAKMTAwMywyMDI2LjAyLjA0IDEyOjAwLGJ1eSwxLjAwLEdCUFVTRCwxLjI2NTAwLDEuMjY1MDAsMC4wMDAwMCwyMDI2LjAyLjA0IDE1OjAwLDEuMjcwMDAsLTcuMDAsMC4wMCwtMC4zMCw1MDAuMDAKMTAwNCwyMDI2LjAyLjA1IDEwOjAwLGJ1eSBsaW1pdCwwLjUwLEVVUlVTRCwxLjA3ODAwLDAuMDAwMDAsMC4wMDAwMCwsMC4wMDAwMCwwLjAwLDAuMDAsMC4wMCwwLjAwCjEwMDUsMjAyNi4wMi4wNSAwMDowMCxiYWxhbmNlLCwsLCwsLCwwLjAwLDAuMDAsMC4wMCwxMDAwLjAwCg==",
+  "expected": {
+    "format": "metatrader",
+    "trades": [
+      {
+        "symbol": "EURUSD",
+        "side": "buy",
+        "quantity": 0.5,
+        "price": 1.085,
+        "executedAt": "2026-02-02T10:15:00.000Z"
+      },
+      {
+        "symbol": "EURUSD",
+        "side": "sell",
+        "quantity": 0.5,
+        "price": 1.09,
+        "fee": 3.7,
+        "executedAt": "2026-02-02T14:30:00.000Z"
+      },
+      {
+        "symbol": "EURUSD",
+        "side": "sell",
+        "quantity": 0.5,
+        "price": 1.092,
+        "executedAt": "2026-02-03T09:00:00.000Z"
+      },
+      {
+        "symbol": "EURUSD",
+        "side": "buy",
+        "quantity": 0.5,
+        "price": 1.0945,
+        "fee": 3.5,
+        "executedAt": "2026-02-03T11:45:00.000Z"
+      },
+      {
+        "symbol": "GBPUSD",
+        "side": "buy",
+        "quantity": 1,
+        "price": 1.265,
+        "executedAt": "2026-02-04T12:00:00.000Z"
+      },
+      {
+        "symbol": "GBPUSD",
+        "side": "sell",
+        "quantity": 1,
+        "price": 1.27,
+        "fee": 7.3,
+        "executedAt": "2026-02-04T15:00:00.000Z"
+      }
+    ],
+    "skippedRows": 2
+  }
+}

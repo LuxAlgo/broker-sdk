@@ -1,0 +1,60 @@
+{
+  "format": "tradingview",
+  "description": "TradingView list of trades, second generation (currency-suffixed headers): the 'Open' placeholder exit row of a still-open trade is dropped while its entry fill survives unmatched; mirrored P&L totals are never read.",
+  "inputBase64": "77u/VHJhZGUgbnVtYmVyLFR5cGUsRGF0ZSBhbmQgdGltZSxTaWduYWwsUHJpY2UgVVNELFNpemUgKHF0eSksTmV0IFBuTCBVU0QsUnVuLXVwIFVTRCxEcmF3ZG93biBVU0QsQ3VtdWxhdGl2ZSBQbkwgVVNECjQsRXhpdCBsb25nLE9wZW4sT3BlbizigJQsMSwwLjAwLDUuMDAsMS4wMCw1NC40MAo0LEVudHJ5IGxvbmcsMjAyNi0wMy0xMyAwOTowMCxMb25nLDEwMi41MCwxLDAuMDAsNS4wMCwxLjAwLDU0LjQwCjMsRXhpdCBsb25nLDIwMjYtMDMtMTIgMTU6MzAsVFAsMTEwLjAwLDIsMTkuNjAsMjUuMDAsNC4wMCw1NC40MAozLEVudHJ5IGxvbmcsMjAyNi0wMy0xMiAxNDowMCxMb25nLDEwMC4yMCwyLDE5LjYwLDI1LjAwLDQuMDAsNTQuNDAKMixFeGl0IHNob3J0LDIwMjYtMDMtMTEgMTI6MDAsU0wsMTA1LjAwLDEsLTEwLjIwLDEuMDAsMTIuMDAsMzQuODAKMixFbnRyeSBzaG9ydCwyMDI2LTAzLTExIDEwOjMwLFNob3J0LDk1LjAwLDEsLTEwLjIwLDEuMDAsMTIuMDAsMzQuODAKMSxFeGl0IGxvbmcsMjAyNi0wMy0xMCAxNjo0NSxUUCwxMDEuMDAsMyw0NS4wMCw1MC4wMCwyLjAwLDQ1LjAwCjEsRW50cnkgbG9uZywyMDI2LTAzLTEwIDEzOjE1LExvbmcsODYuMDAsMyw0NS4wMCw1MC4wMCwyLjAwLDQ1LjAwCg==",
+  "expected": {
+    "format": "tradingview",
+    "trades": [
+      {
+        "symbol": "UNKNOWN",
+        "side": "buy",
+        "quantity": 3,
+        "price": 86,
+        "executedAt": "2026-03-10T13:15:00.000Z"
+      },
+      {
+        "symbol": "UNKNOWN",
+        "side": "sell",
+        "quantity": 3,
+        "price": 101,
+        "executedAt": "2026-03-10T16:45:00.000Z"
+      },
+      {
+        "symbol": "UNKNOWN",
+        "side": "sell",
+        "quantity": 1,
+        "price": 95,
+        "executedAt": "2026-03-11T10:30:00.000Z"
+      },
+      {
+        "symbol": "UNKNOWN",
+        "side": "buy",
+        "quantity": 1,
+        "price": 105,
+        "executedAt": "2026-03-11T12:00:00.000Z"
+      },
+      {
+        "symbol": "UNKNOWN",
+        "side": "buy",
+        "quantity": 2,
+        "price": 100.2,
+        "executedAt": "2026-03-12T14:00:00.000Z"
+      },
+      {
+        "symbol": "UNKNOWN",
+        "side": "sell",
+        "quantity": 2,
+        "price": 110,
+        "executedAt": "2026-03-12T15:30:00.000Z"
+      },
+      {
+        "symbol": "UNKNOWN",
+        "side": "buy",
+        "quantity": 1,
+        "price": 102.5,
+        "executedAt": "2026-03-13T09:00:00.000Z"
+      }
+    ],
+    "skippedRows": 0
+  }
+}

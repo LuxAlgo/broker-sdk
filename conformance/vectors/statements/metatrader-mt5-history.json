@@ -1,0 +1,41 @@
+{
+  "format": "metatrader",
+  "description": "MT5 history report: the Positions section outranks the Deals section, the 8-column hidden comment cell embedded in every row is dropped so columns stay aligned, and duplicated Time/Price headers map to the exit leg.",
+  "inputBase64": "PGh0bWw+PGJvZHk+PHRhYmxlPjx0cj48dGQgY29sc3Bhbj0iMTMiPlRyYWRlIEhpc3RvcnkgUmVwb3J0PC90ZD48L3RyPjx0cj48dGQgY29sc3Bhbj0iMTMiPlBvc2l0aW9uczwvdGQ+PC90cj48dHI+PHRkPlRpbWU8L3RkPjx0ZD5Qb3NpdGlvbjwvdGQ+PHRkPlN5bWJvbDwvdGQ+PHRkPlR5cGU8L3RkPjx0ZD5Wb2x1bWU8L3RkPjx0ZD5QcmljZTwvdGQ+PHRkPlMvTDwvdGQ+PHRkPlQvUDwvdGQ+PHRkPlRpbWU8L3RkPjx0ZD5QcmljZTwvdGQ+PHRkPkNvbW1pc3Npb248L3RkPjx0ZD5Td2FwPC90ZD48dGQ+UHJvZml0PC90ZD48L3RyPjx0cj48dGQ+MjAyNi4wMy4wMiAxMDowMDowMDwvdGQ+PHRkPjMwMTwvdGQ+PHRkPlhBVVVTRDwvdGQ+PHRkPmJ1eTwvdGQ+PHRkPjAuMTA8L3RkPjx0ZD4yMzIwLjUwPC90ZD48dGQ+MjMxMC4wMDwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4yMDI2LjAzLjAyIDE1OjAwOjAwPC90ZD48dGQ+MjMzMS4wMDwvdGQ+PHRkIGNsYXNzPSJoaWRkZW4iIGNvbHNwYW49IjgiPmhpZGRlbiBjb21tZW50IHBheWxvYWQ8L3RkPjx0ZD4tMC43MDwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4xMDUuMDA8L3RkPjwvdHI+PHRyPjx0ZD4yMDI2LjAzLjAzIDA5OjAwOjAwPC90ZD48dGQ+MzAyPC90ZD48dGQ+WEFVVVNEPC90ZD48dGQ+c2VsbDwvdGQ+PHRkPjAuMTA8L3RkPjx0ZD4yMzQwLjAwPC90ZD48dGQ+MjM1MC4wMDwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4yMDI2LjAzLjAzIDEyOjAwOjAwPC90ZD48dGQ+MjMzNS4wMDwvdGQ+PHRkIGNsYXNzPSJoaWRkZW4iIGNvbHNwYW49IjgiPmhpZGRlbiBjb21tZW50IHBheWxvYWQ8L3RkPjx0ZD4tMC43MDwvdGQ+PHRkPi0wLjEwPC90ZD48dGQ+NTAuMDA8L3RkPjwvdHI+PHRyPjx0ZCBjb2xzcGFuPSIxMyI+T3JkZXJzPC90ZD48L3RyPjx0cj48dGQ+T3BlbiBUaW1lPC90ZD48dGQ+T3JkZXI8L3RkPjx0ZD5TeW1ib2w8L3RkPjx0ZD5UeXBlPC90ZD48dGQ+Vm9sdW1lPC90ZD48dGQ+UHJpY2U8L3RkPjx0ZD5TL0w8L3RkPjx0ZD5UL1A8L3RkPjx0ZD5UaW1lPC90ZD48dGQ+U3RhdGU8L3RkPjx0ZD5Db21tZW50PC90ZD48L3RyPjx0cj48dGQ+MjAyNi4wMy4wMiAwOTo1OTowMDwvdGQ+PHRkPjQwMTwvdGQ+PHRkPlhBVVVTRDwvdGQ+PHRkPmJ1eTwvdGQ+PHRkPjAuMTAgLyAwLjEwPC90ZD48dGQ+MjMyMC41MDwvdGQ+PHRkPjIzMTAuMDA8L3RkPjx0ZD4wLjAwPC90ZD48dGQ+MjAyNi4wMy4wMiAxMDowMDowMDwvdGQ+PHRkPmZpbGxlZDwvdGQ+PHRkPjwvdGQ+PC90cj48dHI+PHRkIGNvbHNwYW49IjEzIj5EZWFsczwvdGQ+PC90cj48dHI+PHRkPlRpbWU8L3RkPjx0ZD5EZWFsPC90ZD48dGQ+U3ltYm9sPC90ZD48dGQ+VHlwZTwvdGQ+PHRkPkRpcmVjdGlvbjwvdGQ+PHRkPlZvbHVtZTwvdGQ+PHRkPlByaWNlPC90ZD48dGQ+T3JkZXI8L3RkPjx0ZD5Db21taXNzaW9uPC90ZD48dGQ+RmVlPC90ZD48dGQ+U3dhcDwvdGQ+PHRkPlByb2ZpdDwvdGQ+PHRkPkJhbGFuY2U8L3RkPjx0ZD5Db21tZW50PC90ZD48L3RyPjx0cj48dGQ+MjAyNi4wMy4wMiAxMDowMDowMDwvdGQ+PHRkPjUwMTwvdGQ+PHRkPlhBVVVTRDwvdGQ+PHRkPmJ1eTwvdGQ+PHRkPmluPC90ZD48dGQ+MC4xMDwvdGQ+PHRkPjIzMjAuNTA8L3RkPjx0ZD40MDE8L3RkPjx0ZD4tMC4zNTwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4wLjAwPC90ZD48dGQ+MC4wMDwvdGQ+PHRkPjwvdGQ+PHRkPjwvdGQ+PC90cj48dHI+PHRkPjIwMjYuMDMuMDIgMTU6MDA6MDA8L3RkPjx0ZD41MDI8L3RkPjx0ZD5YQVVVU0Q8L3RkPjx0ZD5zZWxsPC90ZD48dGQ+b3V0PC90ZD48dGQ+MC4xMDwvdGQ+PHRkPjIzMzEuMDA8L3RkPjx0ZD40MDI8L3RkPjx0ZD4tMC4zNTwvdGQ+PHRkPjAuMDA8L3RkPjx0ZD4wLjAwPC90ZD48dGQ+MTA1LjAwPC90ZD48dGQ+PC90ZD48dGQ+PC90ZD48L3RyPjwvdGFibGU+PC9ib2R5PjwvaHRtbD4=",
+  "expected": {
+    "format": "metatrader",
+    "trades": [
+      {
+        "symbol": "XAUUSD",
+        "side": "buy",
+        "quantity": 0.1,
+        "price": 2320.5,
+        "executedAt": "2026-03-02T10:00:00.000Z"
+      },
+      {
+        "symbol": "XAUUSD",
+        "side": "sell",
+        "quantity": 0.1,
+        "price": 2331,
+        "fee": 0.7,
+        "executedAt": "2026-03-02T15:00:00.000Z"
+      },
+      {
+        "symbol": "XAUUSD",
+        "side": "sell",
+        "quantity": 0.1,
+        "price": 2340,
+        "executedAt": "2026-03-03T09:00:00.000Z"
+      },
+      {
+        "symbol": "XAUUSD",
+        "side": "buy",
+        "quantity": 0.1,
+        "price": 2335,
+        "fee": 0.7999999999999999,
+        "executedAt": "2026-03-03T12:00:00.000Z"
+      }
+    ],
+    "skippedRows": 0
+  }
+}

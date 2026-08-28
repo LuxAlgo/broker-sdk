@@ -59,6 +59,11 @@
       "import": "./dist/csv.js",
       "require": "./dist/csv.cjs"
     },
+    "./statements": {
+      "types": "./dist/statements/index.d.ts",
+      "import": "./dist/statements/index.js",
+      "require": "./dist/statements/index.cjs"
+    },
     "./orders": {
       "types": "./dist/orders.d.ts",
       "import": "./dist/orders.js",

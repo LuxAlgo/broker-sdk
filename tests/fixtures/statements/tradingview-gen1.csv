@@ -1,0 +1,5 @@
+Trade #,Type,Signal,Date/Time,Price,Contracts,Profit,Profit %,Cum. Profit,Cum. Profit %,Run-up,Drawdown
+2,Exit Long,Close entry(s) order Long,2024-06-05 20:00,1.0900,1,50.00,0.46,80.00,0.73,60.00,10.00
+2,Entry Long,Long,2024-06-05 16:00,1.0850,1,50.00,0.46,80.00,0.73,60.00,10.00
+1,Exit Short,Close entry(s) order Short,2024-06-04 18:00,1.0850,1,30.00,0.28,30.00,0.28,40.00,5.00
+1,Entry Short,Short,2024-06-04 12:00,1.0880,1,30.00,0.28,30.00,0.28,40.00,5.00

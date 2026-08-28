@@ -2,6 +2,11 @@
 
 All notable changes to `@luxalgo/broker-sdk` are documented here.
 
+## Unreleased
+
+- New `/statements` subpath: `parseStatement` imports real-world statement files — MetaTrader 4/5 statements (the UTF-16LE HTML report included), MT5 deals tables from tester reports, ThinkOrSwim/Schwab account statements, and TradingView strategy-tester trade lists — into `Trade` fills, with `parseStatementCsv` as the generic fallback. Adapted from LuxAlgo/prop-firm-sim's import layer (MIT). Detection is a hard per-format fingerprint; unreadable rows are skipped and counted; every derived value is disclosed as a structured issue; fills are tagged with the account the statement discloses so multi-account histories are never silently merged.
+- Statement conformance vectors under `conformance/vectors/statements/`: one raw statement file per format paired with the exact fills it must produce.
+
 ## 0.3.0
 
 - New adapters: E\*TRADE and Coinbase, bring-your-own-app OAuth (flow helpers included; see `docs/byo-oauth.md`).
