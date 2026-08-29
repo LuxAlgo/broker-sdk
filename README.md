@@ -130,6 +130,30 @@ const positions = positionsFromTrades(trades);
 
 Run the [LuxAlgo MCP server](https://github.com/LuxAlgo/luxalgo-mcp-server) locally and its `broker_*` tools give Claude, Cursor, or any MCP client read-only access to your real accounts through this SDK. Keys go in your own MCP client config as env vars; the agent can ask "how is my portfolio doing?" but can never trade.
 
+## Drop-in connect UI
+
+One React component renders the full "connect your broker" flow: a filterable broker picker, guided credential entry with the right fields per broker, and secret masking.
+
+```tsx
+import { BrokerConnect } from "@luxalgo/broker-sdk/connect";
+
+<BrokerConnect
+  onComplete={(brokerId, credentials) => myVault.store(brokerId, credentials)}
+/>;
+```
+
+The security contract in one sentence: credentials go only to your `onComplete` callback, never to LuxAlgo, and the kit never stores, transmits, or logs them itself. Not using React? The headless state machine behind the component is at `@luxalgo/broker-sdk/connect/core`. React is an optional peer dependency, so installs without React stay warning-free and the rest of the SDK never touches it.
+
+## Sync daemon and webhooks
+
+Run `npx broker-sync` with your keys in `BROKERS_*` env vars (e.g. `BROKERS_ALPACA_API_KEY`, `BROKERS_ALPACA_API_SECRET`, the same convention as the MCP server) and it polls your brokers on an interval, diffs each snapshot against the last, and emits only what changed.
+
+```bash
+npx broker-sync --interval 300 --webhook-url https://example.com/hooks/portfolio --webhook-secret change-me
+```
+
+Events are `trade_executed`, `balance_changed`, `position_opened`, `position_closed`, `position_changed`, `broker_error`, and `sync_completed`, delivered per sweep as one JSON batch. When a secret is configured, every webhook request carries `X-BrokerSync-Signature`, the lowercase hex HMAC-SHA256 of the raw body. State persists to a local JSON file before delivery, so a crash can drop a batch but never replay one. Programmatic use lives at `@luxalgo/broker-sdk/sync`.
+
 ## Place orders (experimental)
 
 The write layer lives in a deliberately separate module. Importing the SDK never gives code trading capability by accident:

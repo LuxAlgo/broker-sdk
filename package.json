@@ -30,7 +30,9 @@
     "gemini",
     "ibkr",
     "mcp",
-    "ai-agents"
+    "ai-agents",
+    "react",
+    "webhooks"
   ],
   "type": "module",
   "engines": {
@@ -41,6 +43,9 @@
     "dist",
     "conformance/vectors"
   ],
+  "bin": {
+    "broker-sync": "dist/sync/cli.js"
+  },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -75,6 +80,21 @@
       "import": "./dist/fx.js",
       "require": "./dist/fx.cjs"
     },
+    "./connect": {
+      "types": "./dist/connect/index.d.ts",
+      "import": "./dist/connect/index.js",
+      "require": "./dist/connect/index.cjs"
+    },
+    "./connect/core": {
+      "types": "./dist/connect/core.d.ts",
+      "import": "./dist/connect/core.js",
+      "require": "./dist/connect/core.cjs"
+    },
+    "./sync": {
+      "types": "./dist/sync/index.d.ts",
+      "import": "./dist/sync/index.js",
+      "require": "./dist/sync/index.cjs"
+    },
     "./conformance/vectors/*.json": "./conformance/vectors/*.json",
     "./package.json": "./package.json"
   },
@@ -86,8 +106,21 @@
     "check": "npm run typecheck && npm run test",
     "prepublishOnly": "npm run check && npm run build"
   },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "jsdom": "^26.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^3.0.0"
