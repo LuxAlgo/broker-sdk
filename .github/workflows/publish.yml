@@ -1,0 +1,61 @@
+name: Publish
+
+# Publishes @luxalgo/broker-sdk to npm when a v* tag is pushed, or via
+# workflow_dispatch from the tagged/version-bumped commit.
+#
+# Auth — configure one of:
+#   1. npm Trusted Publishing (preferred): npmjs.com → package settings →
+#      Trusted Publisher → GitHub Actions, LuxAlgo/broker-sdk, publish.yml
+#   2. Repository secret NPM_TOKEN: Automation token with publish on @luxalgo
+#
+# Release: bump package.json + CHANGELOG, merge to main, then
+#   git tag vX.Y.Z && git push origin vX.Y.Z
+# The tag must match package.json (v0.5.0 ↔ 0.5.0).
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'LuxAlgo/broker-sdk'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - name: Verify tag matches package.json
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          expected="${tag#v}"
+          actual="$(node -p "require('./package.json').version")"
+          if [ "$expected" != "$actual" ]; then
+            echo "::error::Git tag $tag does not match package.json version $actual"
+            exit 1
+          fi
+      - name: Verify pack contents
+        run: npm pack --dry-run --ignore-scripts
+      - name: Publish to npm
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
