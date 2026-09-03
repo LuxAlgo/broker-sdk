@@ -1,6 +1,6 @@
 {
   "name": "@luxalgo/broker-sdk",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Open-source broker connectivity for code, apps, and AI agents. 22 brokers, one normalized schema, zero dependencies. Your keys never leave your machine.",
   "license": "MIT",
   "author": "LuxAlgo Global, LLC",
