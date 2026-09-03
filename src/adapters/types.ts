@@ -1,4 +1,4 @@
-import type { Account, CredentialField } from "../schema.js";
+import type { Account, Bar, BarsRequest, CredentialField } from "../schema.js";
 
 export type Credentials = Record<string, string>;
 
@@ -25,7 +25,10 @@ export type AdapterFetchResult<Raw> = {
  *   adapter's mapping is testable without a network or credentials.
  *
  * Read-only by contract: `fetchRaw` must only ever call account, balance,
- * position, and history endpoints — never trading ones.
+ * position, and history endpoints — never trading ones. The optional
+ * `fetchBars` extends that list with the broker's own market-data
+ * endpoints, which are read-only too; adapters whose broker has no such
+ * endpoints simply leave it undefined.
  */
 export type BrokerAdapter<Raw = unknown> = {
   id: string;
@@ -36,4 +39,11 @@ export type BrokerAdapter<Raw = unknown> = {
   readOnlySetup: string;
   fetchRaw: (credentials: Credentials, ctx: FetchContext) => Promise<AdapterFetchResult<Raw>>;
   normalize: (raw: Raw) => Account[];
+  /**
+   * Historical OHLCV bars for one symbol, using the same read-only
+   * credentials. Only present when the broker exposes market-data
+   * endpoints; `connect()` turns its absence into an
+   * `UnsupportedCapabilityError` so callers can feature-detect either way.
+   */
+  fetchBars?: (credentials: Credentials, symbol: string, request: BarsRequest, ctx: FetchContext) => Promise<Bar[]>;
 };

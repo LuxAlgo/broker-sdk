@@ -87,3 +87,37 @@ export type CredentialField = {
   /** True for secrets (API secrets, tokens); false for public identifiers. */
   secret: boolean;
 };
+
+/**
+ * Bar resolution. Deliberately small: these are the timeframes every
+ * bar-capable broker can serve directly, so no adapter ever has to resample.
+ */
+export type BarTimeframe = "1m" | "5m" | "15m" | "1h" | "1d";
+
+/** One OHLCV bar. `time` is the bar's open, epoch milliseconds UTC. */
+export type Bar = {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  /** Omitted when the venue does not report volume for the bar. */
+  volume?: number;
+};
+
+/** A request for historical bars of one symbol. */
+export type BarsRequest = {
+  timeframe: BarTimeframe;
+  /** Inclusive window start, epoch milliseconds. Broker default when omitted. */
+  from?: number;
+  /** Window end, epoch milliseconds. Broker default when omitted. */
+  to?: number;
+  /**
+   * Maximum number of bars; when the window holds more, the most recent
+   * `limit` bars are kept. Always capped at `MAX_BARS` regardless.
+   */
+  limit?: number;
+};
+
+/** Hard ceiling on bars returned by one `fetchBars` call, whatever `limit` says. */
+export const MAX_BARS = 10_000;

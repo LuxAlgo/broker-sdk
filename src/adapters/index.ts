@@ -24,6 +24,14 @@ import type { BrokerAdapter } from "./types.js";
 
 export type { BrokerAdapter, Credentials, FetchContext, AdapterFetchResult } from "./types.js";
 export { alpaca, alpacaHostForKey, parseAlpacaFills, type AlpacaRaw } from "./alpaca.js";
+export {
+  alpacaBarsQuery,
+  fetchAlpacaBars,
+  isAlpacaCryptoSymbol,
+  normalizeAlpacaBars,
+  type AlpacaBarRow,
+} from "./alpaca-bars.js";
+export { buildBar, effectiveBarLimit, finalizeBars } from "./bars.js";
 export { binance, type BinanceRaw } from "./binance.js";
 export { bybit, type BybitRaw } from "./bybit.js";
 export {
@@ -63,6 +71,19 @@ export { tastytrade, type TastytradeRaw } from "./tastytrade.js";
 export { topstep, parseTopstepTrades, topstepSymbol, type TopstepRaw } from "./topstep.js";
 export { tradestation, type TradestationRaw } from "./tradestation.js";
 export { tradier, parseTradierHistory, tradierList, type TradierRaw } from "./tradier.js";
+export {
+  etOffsetAt,
+  etToEpochMs,
+  fetchTradierBars,
+  formatTradierEtTime,
+  normalizeTradierBars,
+  parseTradierEtTime,
+  tradierBarsQuery,
+  type TradierHistoryResponse,
+  type TradierHistoryRow,
+  type TradierTimesaleRow,
+  type TradierTimesalesResponse,
+} from "./tradier-bars.js";
 export { trading212, trading212Symbol, type Trading212Raw } from "./trading212.js";
 export { webull, buildWebullStringToSign, webullListIn, type WebullRaw } from "./webull.js";
 

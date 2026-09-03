@@ -1,7 +1,7 @@
 import { adapters, getAdapter, type AnyBrokerAdapter, type BrokerId } from "./adapters/index.js";
 import type { Credentials, FetchContext } from "./adapters/types.js";
-import { BrokerError } from "./errors.js";
-import type { BrokerSnapshot, CredentialField } from "./schema.js";
+import { BrokerError, UnsupportedCapabilityError } from "./errors.js";
+import type { Bar, BarsRequest, BrokerSnapshot, CredentialField } from "./schema.js";
 
 export * from "./schema.js";
 export * from "./errors.js";
@@ -63,7 +63,17 @@ export type BrokerConnection = {
   readonly credentials: Credentials;
   /** Fetch a fresh normalized snapshot straight from the broker. */
   fetchSnapshot: () => Promise<BrokerSnapshot>;
+  /**
+   * Historical OHLCV bars from the broker's own market-data endpoints, with
+   * the same read-only credentials. Always present on the object; rejects
+   * with `UnsupportedCapabilityError` when the broker has no such endpoints
+   * (check ahead with `supportsBars(broker)`).
+   */
+  fetchBars: (symbol: string, request: BarsRequest) => Promise<Bar[]>;
 };
+
+/** Whether a broker's adapter can serve historical bars. */
+export const supportsBars = (broker: BrokerId): boolean => typeof getAdapter(broker)?.fetchBars === "function";
 
 /**
  * Open a connection to one broker with the user's own credentials.
@@ -95,6 +105,17 @@ const createConnection = (adapter: AnyBrokerAdapter, options: ConnectOptions): B
     };
   };
 
+  const fetchBars = async (symbol: string, request: BarsRequest): Promise<Bar[]> => {
+    if (!adapter.fetchBars) {
+      throw new UnsupportedCapabilityError(
+        adapter.id,
+        "fetchBars",
+        `${adapter.displayName} exposes no market-data endpoint for historical bars`,
+      );
+    }
+    return adapter.fetchBars(credentials, symbol, request, ctx);
+  };
+
   return {
     broker: adapter.id as BrokerId,
     label: options.label ?? adapter.displayName,
@@ -102,6 +123,7 @@ const createConnection = (adapter: AnyBrokerAdapter, options: ConnectOptions): B
       return { ...credentials };
     },
     fetchSnapshot,
+    fetchBars,
   };
 };
 
@@ -155,6 +177,8 @@ export type BrokerInfo = {
   displayName: string;
   credentials: CredentialField[];
   readOnlySetup: string;
+  /** True when `connection.fetchBars` is backed by a real market-data endpoint. */
+  supportsBars: boolean;
 };
 
 /** Every supported broker with its credential fields and read-only setup guide. */
@@ -166,5 +190,6 @@ export const listBrokers = (): BrokerInfo[] =>
       displayName: adapter.displayName,
       credentials: adapter.credentials,
       readOnlySetup: adapter.readOnlySetup,
+      supportsBars: typeof adapter.fetchBars === "function",
     };
   });

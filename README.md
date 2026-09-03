@@ -76,6 +76,20 @@ console.log(stats.totalEquity, stats.trades?.winRate, stats.topPositions);
 
 One broker failing never takes down the sweep: failures come back alongside the snapshots that succeeded. The stats engine does FIFO round-trip matching, win rate, average win and loss, and per-symbol activity. A sell with no recorded buy is ignored, never guessed at.
 
+## Bars
+
+Brokers that publish their own market-data endpoints can serve historical OHLCV bars with the same read-only credentials, normalized to one shape (`time` is the bar open in epoch ms, oldest-first):
+
+```ts
+const alpaca = connect({ broker: "alpaca", credentials: { apiKey, apiSecret } });
+const from = Date.now() - 24 * 60 * 60 * 1000;
+const bars = await alpaca.fetchBars("AAPL", { timeframe: "1m", from, to: Date.now() });
+// [{ time, open, high, low, close, volume }, ...]
+await alpaca.fetchBars("BTC/USD", { timeframe: "1h", limit: 500 }); // crypto pairs carry a slash
+```
+
+Supported: **Alpaca** (stocks on the IEX feed, crypto pairs; `1m`, `5m`, `15m`, `1h`, `1d`) and **Tradier** (`1m`, `5m`, `15m` via timesales, `1d` via history). Other brokers have no market-data endpoint, so `fetchBars` rejects with `UnsupportedCapabilityError`; check ahead with `supportsBars(brokerId)` or the `supportsBars` flag on `listBrokers()`.
+
 ## Import any broker statement
 
 No API? Any account at any institution is importable from a trade-history CSV. The parser is tolerant on headers (brokers disagree on column names) and strict on rows (anything unreadable is skipped and counted, never guessed):
@@ -89,31 +103,31 @@ const positions = positionsFromTrades(trades);
 
 ## Supported brokers
 
-| Broker | Credentials | Trades history |
-| --- | --- | :---: |
-| Alpaca (live + paper) | API key + secret | ✅ |
-| Binance | API key + secret (read-only) | ➖ |
-| Bybit | API key + secret (read-only) | ➖ |
-| Charles Schwab | your own OAuth2 app | ✅ |
-| Coinbase | your own OAuth2 app (read scope) | ➖ |
-| Crypto.com Exchange | API key + secret (read-only) | ➖ |
-| E\*TRADE | your own OAuth 1.0a app | ✅ |
-| Gemini | API key + secret (auditor role) | ➖ |
-| Hyperliquid | wallet address only | ✅ |
-| Interactive Brokers (Flex) | Flex token + query ID | ✅ |
-| Kraken | API key + secret ("Query Funds") | ➖ |
-| KuCoin | API key + secret + passphrase (read) | ✅ |
-| OKX | API key + secret + passphrase (read) | ➖ |
-| Public.com | API secret key | ✅ |
-| Questrade | API refresh token | ✅ |
-| Robinhood Crypto | API key + Ed25519 private key | ✅ |
-| tastytrade | login (rotating remember token) | ✅ |
-| Topstep (ProjectX) | username + API key | ✅ |
-| TradeStation | your own OAuth2 app | ➖ |
-| Tradier | access token | ✅ |
-| Trading212 | API key | ➖ |
-| Webull (OpenAPI) | App key + secret | ➖ |
-| Any broker via CSV import | a statement file | ✅ |
+| Broker | Credentials | Trades history | Bars |
+| --- | --- | :---: | :---: |
+| Alpaca (live + paper) | API key + secret | ✅ | ✅ |
+| Binance | API key + secret (read-only) | ➖ | ➖ |
+| Bybit | API key + secret (read-only) | ➖ | ➖ |
+| Charles Schwab | your own OAuth2 app | ✅ | ➖ |
+| Coinbase | your own OAuth2 app (read scope) | ➖ | ➖ |
+| Crypto.com Exchange | API key + secret (read-only) | ➖ | ➖ |
+| E\*TRADE | your own OAuth 1.0a app | ✅ | ➖ |
+| Gemini | API key + secret (auditor role) | ➖ | ➖ |
+| Hyperliquid | wallet address only | ✅ | ➖ |
+| Interactive Brokers (Flex) | Flex token + query ID | ✅ | ➖ |
+| Kraken | API key + secret ("Query Funds") | ➖ | ➖ |
+| KuCoin | API key + secret + passphrase (read) | ✅ | ➖ |
+| OKX | API key + secret + passphrase (read) | ➖ | ➖ |
+| Public.com | API secret key | ✅ | ➖ |
+| Questrade | API refresh token | ✅ | ➖ |
+| Robinhood Crypto | API key + Ed25519 private key | ✅ | ➖ |
+| tastytrade | login (rotating remember token) | ✅ | ➖ |
+| Topstep (ProjectX) | username + API key | ✅ | ➖ |
+| TradeStation | your own OAuth2 app | ➖ | ➖ |
+| Tradier | access token | ✅ | ✅ |
+| Trading212 | API key | ➖ | ➖ |
+| Webull (OpenAPI) | App key + secret | ➖ | ➖ |
+| Any broker via CSV import | a statement file | ✅ | ➖ |
 
 `listBrokers()` returns every adapter with its exact credential fields and a one-line guide to creating the key with **read-only scope**, which is all this SDK ever needs.
 
