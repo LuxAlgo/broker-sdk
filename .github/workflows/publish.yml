@@ -38,6 +38,9 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
+      # npm Trusted Publishing needs npm 11.5+ for the OIDC exchange; Node 22
+      # ships npm 10, which cannot and falls back to asking for a token.
+      - run: npm install -g npm@latest && npm --version
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
@@ -55,7 +58,8 @@ jobs:
           fi
       - name: Verify pack contents
         run: npm pack --dry-run --ignore-scripts
+      # Trusted Publishing (OIDC): no token. The workflow's id-token: write
+      # permission is what npm verifies. An empty NODE_AUTH_TOKEN from an
+      # unset secret would make npm skip OIDC, so none is passed here.
       - name: Publish to npm
         run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
