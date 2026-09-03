@@ -173,22 +173,35 @@ describe("createSyncDaemon", () => {
     const dir = await makeTmpDir();
     const statePath = path.join(dir, "state.json");
     const connection = stubConnection("alpaca", makeSnapshot());
+    const sink = capturingSink();
     const daemon = createSyncDaemon({
       connections: [connection],
-      sinks: [],
+      sinks: [sink],
       statePath,
       intervalSeconds: 60,
       now: fixedNow(),
     });
 
+    // A tick that fires mid-sweep joins the running sweep, so the clock must
+    // not advance until the previous sweep has delivered. Poll for that on
+    // the real setTimeout (left unfaked here) instead of sleeping a fixed
+    // 25 ms, which was flaky on a loaded CI runner.
+    const sweepsDelivered = async (n: number): Promise<void> => {
+      for (let i = 0; i < 400 && sink.batches.length < n; i += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      }
+      expect(sink.batches.length).toBe(n);
+    };
+
     await daemon.start();
     expect(connection.fetches).toBe(1);
+    await sweepsDelivered(1);
 
     await vi.advanceTimersByTimeAsync(60_000);
-    await settle();
+    await sweepsDelivered(2);
     expect(connection.fetches).toBe(2);
     await vi.advanceTimersByTimeAsync(60_000);
-    await settle();
+    await sweepsDelivered(3);
     expect(connection.fetches).toBe(3);
 
     await daemon.stop();
