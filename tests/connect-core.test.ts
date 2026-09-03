@@ -21,12 +21,14 @@ const fakeBrokers: BrokerInfo[] = [
       { key: "note", label: "Connection note (optional)", secret: false },
     ],
     readOnlySetup: "Create a read-only key in the fake dashboard.",
+    supportsBars: true,
   },
   {
     id: "kraken",
     displayName: "Fake Kraken",
     credentials: [{ key: "apiKey", label: "API key", secret: true }],
     readOnlySetup: "Read-only scope only.",
+    supportsBars: false,
   },
 ];
 

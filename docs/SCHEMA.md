@@ -38,6 +38,24 @@ One shape for everything, regardless of broker. This document is the human-reada
 | `fee?` | `number` | Commission/fee, absolute value, only when reported and non-zero. |
 | `executedAt?` | `string` | ISO 8601, only when the source carried a parseable timestamp. |
 
+### Bar
+
+Historical OHLCV, returned by `connection.fetchBars(symbol, request)` for brokers whose adapter implements the optional `fetchBars` capability (Alpaca, Tradier). Bars come oldest-first.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `time` | `number` | Bar open, epoch milliseconds UTC. Daily bars open at midnight America/New_York on both brokers (Alpaca reports it that way; Tradier's dates are converted). |
+| `open` / `high` / `low` / `close` | `number` | In the venue's quote currency. A row missing any of the four, or internally inconsistent (open or close outside `[low, high]`), is dropped, never patched. |
+| `volume?` | `number` | Only when the venue reports it for the bar. |
+
+### BarsRequest
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `timeframe` | `"1m" \| "5m" \| "15m" \| "1h" \| "1d"` | Only resolutions the venue serves natively — adapters never resample. Tradier has no hourly interval and rejects `"1h"` with `UnsupportedCapabilityError`. |
+| `from?` / `to?` | `number` | Window bounds, epoch milliseconds. Broker defaults apply when omitted. |
+| `limit?` | `number` | Keeps the most recent `limit` bars of the window. Every call is capped at `MAX_BARS` (10,000) regardless. |
+
 ### BrokerSnapshot
 
 The envelope `fetchSnapshot()` returns: `{ broker, fetchedAt, accounts }`. Plain JSON — persist it however you like.

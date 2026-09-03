@@ -1,5 +1,6 @@
 import { MissingCredentialsError } from "../errors.js";
 import type { Account, AssetClass, Trade } from "../schema.js";
+import { fetchAlpacaBars } from "./alpaca-bars.js";
 import { asFiniteNumber, asIsoTimestamp, rejectResponse } from "./http.js";
 import type { BrokerAdapter, Credentials, FetchContext } from "./types.js";
 
@@ -153,4 +154,5 @@ export const alpaca: BrokerAdapter<AlpacaRaw> = {
     "Generate an API key in the Alpaca dashboard (paper keys start with PK and work too); the SDK only ever calls account, position, and activity endpoints.",
   fetchRaw,
   normalize,
+  fetchBars: fetchAlpacaBars,
 };

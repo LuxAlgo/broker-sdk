@@ -1,6 +1,8 @@
 import { MissingCredentialsError, BrokerRequestError } from "../errors.js";
 import type { Account, Position, Trade } from "../schema.js";
 import { asFiniteNumber, asIsoTimestamp, rejectResponse } from "./http.js";
+import { fetchTradierBars } from "./tradier-bars.js";
+import { tradierList } from "./tradier-list.js";
 import type { BrokerAdapter, Credentials, FetchContext } from "./types.js";
 
 /*
@@ -13,11 +15,7 @@ import type { BrokerAdapter, Credentials, FetchContext } from "./types.js";
 
 const TRADIER_API = "https://api.tradier.com/v1";
 
-/** Normalize Tradier's object-or-array-or-null collections to an array. */
-export const tradierList = <T>(value: T | T[] | null | undefined | "null"): T[] => {
-  if (value === null || value === undefined || value === "null") return [];
-  return Array.isArray(value) ? value : [value];
-};
+export { tradierList } from "./tradier-list.js";
 
 type TradierHistoryEvent = {
   type?: string;
@@ -158,4 +156,5 @@ export const tradier: BrokerAdapter<TradierRaw> = {
     "Copy the API access token from Tradier account settings; the SDK only calls profile, balance, position, and history endpoints.",
   fetchRaw,
   normalize,
+  fetchBars: fetchTradierBars,
 };
