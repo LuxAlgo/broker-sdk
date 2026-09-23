@@ -84,11 +84,14 @@ export const parseFlexStatement = (xml: string): ParsedFlexStatement => {
   const accountId = statement ? (attr(statement, "accountId") ?? null) : null;
 
   const trades: Trade[] = [];
-  for (const trade of elements(xml, "Trade")) {
+  const confirmElements = elements(xml, "TradeConfirm");
+  const tradeElements = confirmElements.length > 0 ? confirmElements : elements(xml, "Trade");
+
+  for (const trade of tradeElements) {
     const symbol = attr(trade, "symbol");
     const side = attr(trade, "buySell")?.toUpperCase();
     const quantityRaw = asFiniteNumber(attr(trade, "quantity"));
-    const price = asFiniteNumber(attr(trade, "tradePrice"));
+    const price = asFiniteNumber(attr(trade, "tradePrice", "price"));
     if (!symbol || (side !== "BUY" && side !== "SELL") || quantityRaw === undefined || price === undefined) {
       continue;
     }
