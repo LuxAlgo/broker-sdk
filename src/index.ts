@@ -37,7 +37,7 @@ export type BrokerCredentials = {
   topstep: { userName: string; apiKey: string };
   tradestation: { clientId: string; clientSecret: string; refreshToken: string; accessToken?: string; expiresAt?: string };
   tradier: { accessToken: string };
-  trading212: { apiKey: string };
+  trading212: { apiKey: string; apiSecret: string; environment?: "live" | "demo" };
   webull: { apiKey: string; apiSecret: string };
 };
 

@@ -125,7 +125,7 @@ const positions = positionsFromTrades(trades);
 | Topstep (ProjectX) | username + API key | ✅ | ➖ |
 | TradeStation | your own OAuth2 app | ➖ | ➖ |
 | Tradier | access token | ✅ | ✅ |
-| Trading212 | API key | ➖ | ➖ |
+| Trading212 | API key ID + secret (live or demo) | ✅ | ➖ |
 | Webull (OpenAPI) | App key + secret | ➖ | ➖ |
 | Any broker via CSV import | a statement file | ✅ | ➖ |
 
