@@ -65,14 +65,17 @@ const fetchRaw = async (credentials: Credentials, ctx: FetchContext) => {
     throw new MissingCredentialsError("binance", "Binance connection is missing its API key or secret");
   }
 
-  const response = await ctx.fetch(`${BINANCE_API}/api/v3/account?${signedQuery(apiSecret)}`, {
+  // Binance.US runs the same spot API at api.binance.us for its own
+  // accounts and keys; callers pass it as `baseUrl`.
+  const base = ctx.baseUrl ?? BINANCE_API;
+  const response = await ctx.fetch(`${base}/api/v3/account?${signedQuery(apiSecret)}`, {
     headers: { "X-MBX-APIKEY": apiKey },
   });
   if (!response.ok) rejectResponse("binance", "Binance", response);
   const account = (await response.json()) as BinanceAccount;
 
   const usdtPrices: Record<string, number> = {};
-  const pricesResponse = await ctx.fetch(`${BINANCE_API}/api/v3/ticker/price`);
+  const pricesResponse = await ctx.fetch(`${base}/api/v3/ticker/price`);
   if (pricesResponse.ok) {
     const rows = (await pricesResponse.json()) as { symbol: string; price: string }[];
     for (const row of rows) {

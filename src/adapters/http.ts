@@ -1,10 +1,14 @@
-import { BrokerAuthError, BrokerRequestError } from "../errors.js";
+import { BrokerAuthError, BrokerRequestError, RegionBlockedError } from "../errors.js";
 
 /**
- * Turn a non-OK response into the right typed error: 401/403 mean the
- * credentials were rejected, anything else is a request failure.
+ * Turn a non-OK response into the right typed error: 451 means the broker
+ * refuses the caller's region before reading any credential, 401/403 mean
+ * the credentials were rejected, anything else is a request failure.
  */
 export const rejectResponse = (broker: string, displayName: string, response: Response): never => {
+  if (response.status === 451) {
+    throw new RegionBlockedError(broker, `${displayName} is unavailable from this region (451)`);
+  }
   if (response.status === 401 || response.status === 403) {
     throw new BrokerAuthError(broker, `${displayName} rejected the credentials (${response.status})`);
   }

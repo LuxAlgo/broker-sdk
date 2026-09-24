@@ -49,6 +49,12 @@ export type ConnectOptions<B extends BrokerId = BrokerId> = {
   /** Custom fetch (proxies, instrumentation, tests). Defaults to global fetch. */
   fetch?: typeof globalThis.fetch;
   /**
+   * API origin override for brokers that serve the same API from another
+   * host, e.g. `"https://api.binance.us"` for a Binance.US account (a
+   * separate company with its own keys). Ignored by brokers without one.
+   */
+  baseUrl?: string;
+  /**
    * Called when a fetch rotates the stored credentials (e.g. Questrade
    * refresh tokens are single-use). Persist the new value here, or the next
    * fetch fails.
@@ -90,7 +96,7 @@ export const connect = <B extends BrokerId>(options: ConnectOptions<B>): BrokerC
 
 const createConnection = (adapter: AnyBrokerAdapter, options: ConnectOptions): BrokerConnection => {
   let credentials: Credentials = { ...(options.credentials as Credentials) };
-  const ctx: FetchContext = { fetch: options.fetch ?? globalThis.fetch };
+  const ctx: FetchContext = { fetch: options.fetch ?? globalThis.fetch, ...(options.baseUrl ? { baseUrl: options.baseUrl } : {}) };
 
   const fetchSnapshot = async (): Promise<BrokerSnapshot> => {
     const result = await adapter.fetchRaw(credentials, ctx);

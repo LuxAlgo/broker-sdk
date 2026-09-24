@@ -5,6 +5,12 @@ export type Credentials = Record<string, string>;
 /** Injected IO — lets callers supply a custom fetch (proxies, tests). */
 export type FetchContext = {
   fetch: typeof globalThis.fetch;
+  /**
+   * Override of the broker's API origin, for brokers that run the same API
+   * under another host (Binance.US at `https://api.binance.us`). Adapters
+   * that have no such variant ignore it.
+   */
+  baseUrl?: string;
 };
 
 export type AdapterFetchResult<Raw> = {
