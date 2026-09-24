@@ -38,6 +38,21 @@ export class BrokerRequestError extends BrokerError {
 }
 
 /**
+ * The broker refused to serve the request because of where it came from
+ * (HTTP 451, "unavailable for legal reasons"), before looking at any
+ * credential. Nothing about the key is wrong; the fix is to call from a
+ * region the broker serves. Binance.com and Bybit answer this to US IPs.
+ */
+export class RegionBlockedError extends BrokerError {
+  readonly status = 451;
+
+  constructor(broker: string, message: string) {
+    super(broker, message);
+    this.name = "RegionBlockedError";
+  }
+}
+
+/**
  * The adapter does not implement an optional capability (e.g. `fetchBars`
  * on a broker with no market-data endpoints), or does not support the
  * requested variant of it (a timeframe the venue cannot serve).

@@ -2,6 +2,13 @@
 
 All notable changes to `@luxalgo/broker-sdk` are documented here.
 
+## Unreleased
+
+### Added
+
+- `RegionBlockedError`: thrown when a broker answers HTTP 451 to the caller's region before reading any credential (Binance.com and Bybit do this for US IPs). Previously surfaced as a generic `BrokerRequestError` with the status only in the message, which callers mistook for bad keys. Subclass of `BrokerError`, `status` is `451`.
+- `baseUrl` on `ConnectOptions` (and `FetchContext`): API origin override for brokers that run the same API from another host. Honoured by **Binance** so a Binance.US account (a separate company with its own keys) connects with `baseUrl: "https://api.binance.us"`. Adapters without such a variant ignore it.
+
 ## 0.5.0
 
 ### Added

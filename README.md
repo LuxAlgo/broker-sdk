@@ -65,6 +65,8 @@ import { computeStats } from "@luxalgo/broker-sdk/stats";
 const portfolio = createPortfolio();
 portfolio.add({ broker: "alpaca", credentials: { apiKey, apiSecret } });
 portfolio.add({ broker: "binance", credentials: { apiKey, apiSecret } });
+// A Binance.US account is a different company with its own keys: point the same adapter at its host.
+portfolio.add({ broker: "binance", credentials: { apiKey, apiSecret }, baseUrl: "https://api.binance.us" });
 portfolio.add({ broker: "hyperliquid", credentials: { walletAddress } });
 
 const { snapshots, failures } = await portfolio.fetchAll();
@@ -106,7 +108,7 @@ const positions = positionsFromTrades(trades);
 | Broker | Credentials | Trades history | Bars |
 | --- | --- | :---: | :---: |
 | Alpaca (live + paper) | API key + secret | ✅ | ✅ |
-| Binance | API key + secret (read-only) | ➖ | ➖ |
+| Binance (also Binance.US via `baseUrl`) | API key + secret (read-only) | ➖ | ➖ |
 | Bybit | API key + secret (read-only) | ➖ | ➖ |
 | Charles Schwab | your own OAuth2 app | ✅ | ➖ |
 | Coinbase | your own OAuth2 app (read scope) | ➖ | ➖ |
