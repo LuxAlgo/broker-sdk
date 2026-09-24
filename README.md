@@ -2,6 +2,8 @@
   <img src="https://raw.githubusercontent.com/LuxAlgo/broker-sdk/main/docs/assets/hero.svg" alt="Broker SDK. Every broker. One schema. Your keys never leave your machine." width="100%"/>
 </p>
 
+<h1 align="center">Broker SDK</h1>
+
 <p align="center">
   <a href="https://www.npmjs.com/package/@luxalgo/broker-sdk"><img src="https://img.shields.io/npm/v/@luxalgo/broker-sdk?color=000000&labelColor=000000" alt="npm version"/></a>
   <a href="https://github.com/LuxAlgo/broker-sdk/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/LuxAlgo/broker-sdk/ci.yml?label=ci&labelColor=000000" alt="CI"/></a>
@@ -10,6 +12,8 @@
 </p>
 
 <p align="center">
+  <a href="https://www.luxalgo.com/broker-sdk/"><b>Homepage</b></a>
+  &nbsp;·&nbsp;
   <a href="docs/recipes.md"><b>Recipes</b></a>
   &nbsp;·&nbsp;
   <a href="docs/SCHEMA.md"><b>Schema</b></a>
@@ -21,7 +25,7 @@
   <a href="https://github.com/LuxAlgo/luxalgo-mcp-server"><b>MCP server</b></a>
 </p>
 
-<p align="center"><sub>Broker SDK is a <a href="https://www.luxalgo.com">LuxAlgo</a> open-source project. Official repository: <a href="https://github.com/LuxAlgo/broker-sdk">github.com/LuxAlgo/broker-sdk</a></sub></p>
+<p align="center"><sub>Broker SDK is a <a href="https://www.luxalgo.com">LuxAlgo</a> open-source project.</sub></p>
 
 **Connect code, apps, and AI agents to real brokerage and exchange accounts.** Point it at Charles Schwab, Alpaca, Robinhood Crypto, Binance, Kraken, Interactive Brokers and more. Get back the same clean picture from every one of them: accounts, balances, positions, trade history, and computed performance stats.
 

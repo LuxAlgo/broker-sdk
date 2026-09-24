@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/LuxAlgo/broker-sdk.git"
   },
-  "homepage": "https://github.com/LuxAlgo/broker-sdk#readme",
+  "homepage": "https://www.luxalgo.com/broker-sdk/",
   "bugs": "https://github.com/LuxAlgo/broker-sdk/issues",
   "keywords": [
     "broker",
