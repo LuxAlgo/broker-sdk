@@ -3,14 +3,15 @@ import { describe, expect, it } from "vitest";
 import { connect, createPortfolio, listBrokers } from "../src/index.js";
 import { MissingCredentialsError } from "../src/errors.js";
 
-/** Fake fetch serving Trading212's three endpoints from fixtures. */
-const trading212Fetch = ((url: string | URL) => {
+/** Fake fetch serving Trading 212's current read-only endpoints. */
+const trading212Fetch = ((url: string | URL, init?: RequestInit) => {
+  expect(new Headers(init?.headers).get("Authorization")).toBe(`Basic ${Buffer.from("k:s").toString("base64")}`);
   const path = String(url);
-  const body = path.endsWith("/equity/account/info")
-    ? { currencyCode: "EUR", id: 7 }
-    : path.endsWith("/equity/account/cash")
-      ? { total: 1000, free: 400 }
-      : [{ ticker: "AAPL_US_EQ", quantity: 1, currentPrice: 190 }];
+  const body = path.includes("/equity/account/summary")
+    ? { currency: "EUR", id: 7, totalValue: 1000, cash: { availableToTrade: 400 } }
+    : path.includes("/equity/positions")
+      ? [{ instrument: { ticker: "AAPL_US_EQ", currency: "EUR" }, quantity: 1, averagePricePaid: 180, walletImpact: { currentValue: 190 } }]
+      : { items: [{ order: { ticker: "AAPL_US_EQ", side: "BUY", instrument: { currency: "EUR" } }, fill: { type: "TRADE", quantity: 1, price: 180, filledAt: "2026-09-22T10:00:00Z" } }], nextPagePath: null };
   return Promise.resolve(new Response(JSON.stringify(body), { status: 200 }));
 }) as typeof fetch;
 
@@ -18,7 +19,7 @@ describe("connect()", () => {
   it("fetches a normalized snapshot through an injected fetch", async () => {
     const connection = connect({
       broker: "trading212",
-      credentials: { apiKey: "k" },
+      credentials: { apiKey: "k", apiSecret: "s" },
       fetch: trading212Fetch,
     });
     const snapshot = await connection.fetchSnapshot();
@@ -31,8 +32,9 @@ describe("connect()", () => {
         currency: "EUR",
         equity: 1000,
         cash: 400,
-        positions: [{ symbol: "AAPL", quantity: 1, marketValue: 190, assetClass: "equity" }],
-        trades: [],
+        environment: "live",
+        positions: [{ symbol: "AAPL", quantity: 1, marketValue: 190, averageEntryPrice: 180, assetClass: "equity" }],
+        trades: [{ symbol: "AAPL", side: "buy", quantity: 1, price: 180, executedAt: "2026-09-22T10:00:00.000Z" }],
       },
     ]);
   });
@@ -40,7 +42,7 @@ describe("connect()", () => {
   it("throws a typed error before any network call when credentials are missing", async () => {
     const connection = connect({
       broker: "trading212",
-      credentials: { apiKey: "" },
+      credentials: { apiKey: "", apiSecret: "" },
       fetch: (() => {
         throw new Error("network must not be touched");
       }) as typeof fetch,
@@ -52,7 +54,7 @@ describe("connect()", () => {
 describe("createPortfolio()", () => {
   it("collects failures per connection instead of failing the whole fetch", async () => {
     const portfolio = createPortfolio();
-    portfolio.add({ broker: "trading212", credentials: { apiKey: "k" }, fetch: trading212Fetch });
+    portfolio.add({ broker: "trading212", credentials: { apiKey: "k", apiSecret: "s" }, fetch: trading212Fetch });
     portfolio.add({
       broker: "kraken",
       credentials: { apiKey: "k", apiSecret: Buffer.from("s").toString("base64") },
@@ -77,6 +79,8 @@ describe("listBrokers()", () => {
       expect(broker.readOnlySetup.length).toBeGreaterThan(0);
       expect(Array.isArray(broker.credentials)).toBe(true);
     }
+    const trading212 = brokers.find((broker) => broker.id === "trading212");
+    expect(trading212?.credentials.map((field) => field.key)).toEqual(["apiKey", "apiSecret", "environment"]);
     const hyperliquid = brokers.find((broker) => broker.id === "hyperliquid");
     expect(hyperliquid?.credentials).toEqual([{ key: "walletAddress", label: "Wallet address (0x…)", secret: false }]);
   });
