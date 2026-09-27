@@ -2,6 +2,11 @@ import type { Account, Bar, BarsRequest, CredentialField } from "../schema.js";
 
 export type Credentials = Record<string, string>;
 
+/** Interpretation of source timestamps without offsets; currently consumed only by IBKR. */
+export type NormalizationContext = {
+  statementTimeZone?: string;
+};
+
 /** Injected IO — lets callers supply a custom fetch (proxies, tests). */
 export type FetchContext = {
   fetch: typeof globalThis.fetch;
@@ -38,7 +43,7 @@ export type BrokerAdapter<Raw = unknown> = {
   /** How to create the key with a read-only scope, in one sentence. */
   readOnlySetup: string;
   fetchRaw: (credentials: Credentials, ctx: FetchContext) => Promise<AdapterFetchResult<Raw>>;
-  normalize: (raw: Raw) => Account[];
+  normalize: (raw: Raw, context?: NormalizationContext) => Account[];
   /**
    * Historical OHLCV bars for one symbol, using the same read-only
    * credentials. Only present when the broker exposes market-data
