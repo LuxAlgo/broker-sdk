@@ -60,6 +60,31 @@ type Account = {
 };
 ```
 
+### IBKR Flex statement timezone
+
+For Flex XML timestamps without an offset, pass the timezone used by the report:
+
+```ts
+const ibkr = connect({
+  broker: "ibkr-flex",
+  credentials: { flexToken, flexQueryId },
+  statementTimeZone: "America/New_York",
+});
+```
+
+The same option is accepted by `parseFlexStatement(xml, { statementTimeZone })`
+from `/adapters`. Omitting it preserves the UTC default. The selected zone's
+daylight-saving rules are applied; explicit `Z` and numeric offsets take
+precedence. Invalid dates, unsupported timezone suffixes, and ambiguous or
+nonexistent local times leave `executedAt` absent. Consumers should report and
+skip these untimed fills. Date-only reports retain their midnight fallback.
+Other brokers ignore this option. Use the report's actual timezone; it is not
+inferred from its symbols or exchanges.
+
+Changing this option does not repair previously stored trades. Consumers that
+deduplicate on timestamps should recover into a separate account or perform an
+explicit reconciliation before using corrected timestamps with existing history.
+
 ## Your whole portfolio, every broker at once
 
 ```ts

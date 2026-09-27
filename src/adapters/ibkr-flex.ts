@@ -1,7 +1,8 @@
 import { BrokerRequestError, MissingCredentialsError } from "../errors.js";
 import type { Account, AssetClass, Position, Trade } from "../schema.js";
 import { asFiniteNumber, rejectResponse } from "./http.js";
-import type { BrokerAdapter, Credentials, FetchContext } from "./types.js";
+import type { BrokerAdapter, Credentials, FetchContext, NormalizationContext } from "./types.js";
+import { ibkrTimeZone, ibkrTimestampParser } from "./ibkr-time.js";
 
 /*
   Interactive Brokers via the Flex Web Service — real US equities/futures/
@@ -57,15 +58,6 @@ const tagText = (xml: string, tag: string): string | undefined => {
   return match?.[1]?.trim() || undefined;
 };
 
-/** "20260815" or "20260815;101530" → ISO timestamp. */
-const flexDateToIso = (raw: string | undefined): string | undefined => {
-  if (!raw) return undefined;
-  const match = raw.match(/^(\d{4})(\d{2})(\d{2})(?:[;, ](\d{2})(\d{2})(\d{2}))?$/);
-  if (!match) return undefined;
-  const [, year, month, day, hours = "00", minutes = "00", seconds = "00"] = match;
-  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
-};
-
 export type ParsedFlexStatement = {
   accountId: string | null;
   trades: Trade[];
@@ -79,7 +71,8 @@ export type ParsedFlexStatement = {
  * present depend on how the user configured the query, so anything missing
  * simply yields an empty list rather than an error.
  */
-export const parseFlexStatement = (xml: string): ParsedFlexStatement => {
+export const parseFlexStatement = (xml: string, options: NormalizationContext = {}): ParsedFlexStatement => {
+  const flexDateToIso = ibkrTimestampParser(ibkrTimeZone(options.statementTimeZone));
   const statement = elements(xml, "FlexStatement")[0];
   const accountId = statement ? (attr(statement, "accountId") ?? null) : null;
 
@@ -150,8 +143,8 @@ export type IbkrFlexRaw = {
   statementXml: string;
 };
 
-const normalize = (raw: IbkrFlexRaw): Account[] => {
-  const parsed = parseFlexStatement(raw.statementXml);
+const normalize = (raw: IbkrFlexRaw, context?: NormalizationContext): Account[] => {
+  const parsed = parseFlexStatement(raw.statementXml, context);
   const positionsValue = parsed.positions.reduce((sum, position) => sum + (position.marketValue ?? 0), 0);
   const equity = positionsValue + (parsed.cash ?? 0);
 

@@ -2,6 +2,11 @@
 
 All notable changes to `@luxalgo/broker-sdk` are documented here.
 
+## 0.5.1
+
+- IBKR Flex XML: optional `statementTimeZone` on `connect()` and `parseFlexStatement()` interprets timestamps without offsets in the selected IANA timezone, including daylight saving. Existing callers retain the UTC default. Explicit UTC/numeric offsets are honored; invalid, ambiguous, or nonexistent local timestamps leave `executedAt` absent.
+- Optional normalization context for adapters. Other brokers' timestamp behavior is unchanged.
+
 ## 0.5.0
 
 ### Added

@@ -1,13 +1,14 @@
 import { adapters, getAdapter, type AnyBrokerAdapter, type BrokerId } from "./adapters/index.js";
 import type { Credentials, FetchContext } from "./adapters/types.js";
 import { BrokerError, UnsupportedCapabilityError } from "./errors.js";
+import { ibkrTimeZone } from "./adapters/ibkr-time.js";
 import type { Bar, BarsRequest, BrokerSnapshot, CredentialField } from "./schema.js";
 
 export * from "./schema.js";
 export * from "./errors.js";
 export { adapters, getAdapter } from "./adapters/index.js";
 export type { AnyBrokerAdapter, BrokerAdapter, BrokerId } from "./adapters/index.js";
-export type { Credentials, FetchContext } from "./adapters/types.js";
+export type { Credentials, FetchContext, NormalizationContext } from "./adapters/types.js";
 
 /** The exact credential fields each broker needs, typed per broker. */
 export type BrokerCredentials = {
@@ -46,6 +47,8 @@ export type ConnectOptions<B extends BrokerId = BrokerId> = {
   credentials: BrokerCredentials[B];
   /** Your own display label for this connection. */
   label?: string;
+  /** IANA timezone for offset-free IBKR Flex timestamps. Defaults to UTC; other brokers ignore it. */
+  statementTimeZone?: string;
   /** Custom fetch (proxies, instrumentation, tests). Defaults to global fetch. */
   fetch?: typeof globalThis.fetch;
   /**
@@ -91,6 +94,9 @@ export const connect = <B extends BrokerId>(options: ConnectOptions<B>): BrokerC
 const createConnection = (adapter: AnyBrokerAdapter, options: ConnectOptions): BrokerConnection => {
   let credentials: Credentials = { ...(options.credentials as Credentials) };
   const ctx: FetchContext = { fetch: options.fetch ?? globalThis.fetch };
+  const normalization = adapter.id === "ibkr-flex"
+    ? { statementTimeZone: ibkrTimeZone(options.statementTimeZone) }
+    : undefined;
 
   const fetchSnapshot = async (): Promise<BrokerSnapshot> => {
     const result = await adapter.fetchRaw(credentials, ctx);
@@ -101,7 +107,7 @@ const createConnection = (adapter: AnyBrokerAdapter, options: ConnectOptions): B
     return {
       broker: adapter.id,
       fetchedAt: new Date().toISOString(),
-      accounts: adapter.normalize(result.raw),
+      accounts: adapter.normalize(result.raw, normalization),
     };
   };
 
