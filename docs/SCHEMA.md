@@ -37,6 +37,9 @@ One shape for everything, regardless of broker. This document is the human-reada
 | `price` | `number` | Per unit, in the account's `currency`. |
 | `fee?` | `number` | Commission/fee, absolute value, only when reported and non-zero. |
 | `executedAt?` | `string` | ISO 8601, only when the source carried a parseable timestamp. |
+| `assetClass?` | same as `Position.assetClass` | Only when the broker states it (Webull `instrument_type`). |
+| `multiplier?` | `number` | Contract size, only when the broker states it (Webull `option_contract_multiplier`). |
+| `positionEffect?` | `"open" \| "close"` | Only when the broker states whether the fill opened or closed a position (Webull `position_intent`). |
 
 ### Bar
 

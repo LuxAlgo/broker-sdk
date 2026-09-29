@@ -155,7 +155,7 @@ const positions = positionsFromTrades(trades);
 | TradeStation | your own OAuth2 app | ➖ | ➖ |
 | Tradier | access token | ✅ | ✅ |
 | Trading212 | API key | ➖ | ➖ |
-| Webull (OpenAPI) | App key + secret | ➖ | ➖ |
+| Webull (OpenAPI) | App key + secret | ✅ | ➖ |
 | Any broker via CSV import | a statement file | ✅ | ➖ |
 
 `listBrokers()` returns every adapter with its exact credential fields and a one-line guide to creating the key with **read-only scope**, which is all this SDK ever needs.

@@ -41,6 +41,12 @@ export type Trade = {
   fee?: number;
   /** ISO 8601 timestamp, when the source carried one. */
   executedAt?: string;
+  /** Instrument classification, only when the broker states it. Never guessed. */
+  assetClass?: AssetClass;
+  /** Contract size (100 for a standard US equity option), only when the broker states it. */
+  multiplier?: number;
+  /** Whether the fill opened or closed a position, only when the broker states it (Webull `BUY_TO_OPEN`). */
+  positionEffect?: "open" | "close";
 };
 
 /** One account at a broker, fully normalized. */
