@@ -40,6 +40,14 @@ describe("connectionsFromEnv", () => {
     });
   });
 
+  it("requires both Trading 212 keys but allows its environment to be omitted", () => {
+    expect(connectionsFromEnv({ BROKERS_TRADING212_API_KEY: "key" })).toEqual([]);
+    expect(connectionsFromEnv({
+      BROKERS_TRADING212_API_KEY: "key",
+      BROKERS_TRADING212_API_SECRET: "secret",
+    })).toEqual([{ broker: "trading212", credentials: { apiKey: "key", apiSecret: "secret" } }]);
+  });
+
   it("skips brokers with incomplete or blank credentials", () => {
     const specs = connectionsFromEnv({
       BROKERS_ALPACA_API_KEY: "key", // missing BROKERS_ALPACA_API_SECRET
@@ -121,6 +129,8 @@ describe("resolveConfig", () => {
       env: {
         BROKERS_TRADIER_ACCESS_TOKEN: "env-token",
         BROKERS_TRADING212_API_KEY: "t212",
+        BROKERS_TRADING212_API_SECRET: "secret",
+        BROKERS_TRADING212_ENVIRONMENT: "demo",
       },
     });
 
@@ -130,6 +140,8 @@ describe("resolveConfig", () => {
     });
     expect(config.connections.find((spec) => spec.broker === "trading212")?.credentials).toEqual({
       apiKey: "t212",
+      apiSecret: "secret",
+      environment: "demo",
     });
   });
 

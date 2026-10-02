@@ -1,27 +1,34 @@
 {
   "broker": "trading212",
-  "description": "Tickers like AAPL_US_EQ normalize to the plain symbol; position value derives from quantity × currentPrice; free cash lands in cash.",
+  "description": "Current account summary, positions and filled orders normalize to account-currency values.",
   "raw": {
-    "info": {
-      "currencyCode": "EUR",
-      "id": 555
+    "summary": {
+      "id": 555,
+      "currency": "EUR",
+      "totalValue": 2000.5,
+      "cash": { "availableToTrade": 800 }
     },
-    "cash": {
-      "total": 2000.5,
-      "free": 800
-    },
-    "portfolio": [
+    "positions": [
       {
-        "ticker": "AAPL_US_EQ",
+        "instrument": { "ticker": "AAPL_US_EQ", "currency": "EUR" },
         "quantity": 2,
-        "currentPrice": 190.25,
-        "averagePrice": 180.1
+        "averagePricePaid": 180.1,
+        "walletImpact": { "currentValue": 380.5 }
+      },
+      { "instrument": { "ticker": "GONE_US_EQ" }, "quantity": 0 }
+    ],
+    "history": [
+      {
+        "order": { "ticker": "AAPL_US_EQ", "side": "BUY", "instrument": { "currency": "EUR" } },
+        "fill": { "type": "TRADE", "quantity": 2, "price": 180.1, "filledAt": "2026-09-22T10:00:00Z" }
       },
       {
-        "ticker": "GONE_US_EQ",
-        "quantity": 0
-      }
-    ]
+        "order": { "ticker": "AAPL_US_EQ", "side": "SELL", "instrument": { "currency": "EUR" } },
+        "fill": { "type": "TRADE", "quantity": -1, "price": 190, "filledAt": "2026-09-23T10:00:00Z" }
+      },
+      { "order": { "ticker": "AAPL_US_EQ", "side": "BUY" }, "fill": null }
+    ],
+    "environment": "live"
   },
   "expected": [
     {
@@ -30,6 +37,7 @@
       "currency": "EUR",
       "equity": 2000.5,
       "cash": 800,
+      "environment": "live",
       "positions": [
         {
           "symbol": "AAPL",
@@ -39,7 +47,10 @@
           "assetClass": "equity"
         }
       ],
-      "trades": []
+      "trades": [
+        { "symbol": "AAPL", "side": "buy", "quantity": 2, "price": 180.1, "executedAt": "2026-09-22T10:00:00.000Z" },
+        { "symbol": "AAPL", "side": "sell", "quantity": 1, "price": 190, "executedAt": "2026-09-23T10:00:00.000Z" }
+      ]
     }
   ]
 }

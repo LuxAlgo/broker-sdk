@@ -6,7 +6,7 @@
     underscores, credential key camelCase as UPPER_SNAKE —
     BROKERS_ALPACA_API_KEY, BROKERS_OKX_PASSPHRASE,
     BROKERS_HYPERLIQUID_WALLET_ADDRESS, BROKERS_CRYPTO_COM_API_SECRET, ...
-    A broker is connected when every one of its credential fields is set.
+    A broker is connected when every required credential field is set.
 
   - An optional JSON config file (--config) for settings plus explicit
     connection entries.
@@ -63,6 +63,7 @@ export const connectionsFromEnv = (env: NodeJS.ProcessEnv): ConnectionSpec[] => 
     for (const field of broker.credentials) {
       const value = env[envVarName(broker.id, field.key)]?.trim();
       if (!value) {
+        if (field.label.toLowerCase().includes("(optional")) continue;
         complete = false;
         break;
       }
