@@ -52,6 +52,12 @@ export type ConnectOptions<B extends BrokerId = BrokerId> = {
   /** Custom fetch (proxies, instrumentation, tests). Defaults to global fetch. */
   fetch?: typeof globalThis.fetch;
   /**
+   * ISO 8601 lower bound for trade history on brokers that page through it
+   * (Webull). Pass your last sync time minus an overlap to fetch only recent
+   * fills; omit for the adapter's full first-sync lookback.
+   */
+  historySince?: string;
+  /**
    * Called when a fetch rotates the stored credentials (e.g. Questrade
    * refresh tokens are single-use). Persist the new value here, or the next
    * fetch fails.
@@ -93,7 +99,10 @@ export const connect = <B extends BrokerId>(options: ConnectOptions<B>): BrokerC
 
 const createConnection = (adapter: AnyBrokerAdapter, options: ConnectOptions): BrokerConnection => {
   let credentials: Credentials = { ...(options.credentials as Credentials) };
-  const ctx: FetchContext = { fetch: options.fetch ?? globalThis.fetch };
+  const ctx: FetchContext = {
+    fetch: options.fetch ?? globalThis.fetch,
+    ...(options.historySince !== undefined ? { historySince: options.historySince } : {}),
+  };
   const normalization = adapter.id === "ibkr-flex"
     ? { statementTimeZone: ibkrTimeZone(options.statementTimeZone) }
     : undefined;
