@@ -56,9 +56,28 @@ type Account = {
   cash?: number;       // when the broker reports it separately
   environment?: "live" | "paper";
   positions: { symbol: string; quantity: number; marketValue?: number }[];
-  trades: { symbol: string; side: "buy" | "sell"; quantity: number; price: number; fee?: number; executedAt?: string }[];
+  trades: {
+    symbol: string;
+    side: "buy" | "sell";
+    quantity: number;
+    price: number;
+    fee?: number;
+    executedAt?: string;
+    executionId?: string;
+    instrumentId?: string;
+    executionTieBreak?: number;
+    reportedGrossPnl?: number;
+  }[];
 };
 ```
+
+Topstep fills retain native fill IDs, full futures contract IDs, and UTC
+timestamps with source fractional precision. `fee` includes reported fees
+plus commissions (including explicit zero); `reportedGrossPnl` carries the
+provider's realized gross P&L. Numeric fill IDs provide `executionTieBreak` as a
+deterministic tie-break for equal timestamps, without a guarantee of actual
+chronology. See [the schema](docs/SCHEMA.md#trade) for cost assumptions and consumer
+limitations. All returned provider accounts are imported automatically.
 
 ### IBKR Flex statement timezone
 
