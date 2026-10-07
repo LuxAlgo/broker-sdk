@@ -45,9 +45,16 @@ One shape for everything, regardless of broker. This document is the human-reada
 Topstep's `executionTieBreak` uses non-negative safe-integer numeric fill IDs;
 the [API reference](https://gateway.docs.projectx.com/docs/api-reference/trade/trade-search/)
 does not guarantee their chronology. String IDs have no inferred ordering key;
-unsafe numeric IDs are omitted. Provider array order is preserved.
+unsafe numeric IDs are omitted. Provider array order is preserved. Stats compares
+precise instants, preserving input order for ties; it does not use this key,
+contract IDs, or reported P&L to reconstruct futures results.
 
 Keep precise timestamps as strings: `Date` discards sub-millisecond digits.
+Sync uses native fill IDs and occurrence counts within each account. On upgrade,
+old Topstep fills without native metadata can match by the original trade fields
+and millisecond timestamp. Exact matches take precedence. Fills indistinguishable
+in the old data remain ambiguous during that transition. Other timestamp-keyed
+consumers must handle the precision change themselves.
 
 The [published Topstep API schema](https://api.topstepx.com/swagger/v1/swagger.json)
 declares both `fees` and optional `commissions`, but does not describe whether

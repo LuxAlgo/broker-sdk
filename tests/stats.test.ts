@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import type { Trade } from "../src/schema.js";
-import { computeStats, positionsFromTrades } from "../src/stats.js";
+import { computeStats, matchRoundTrips, positionsFromTrades } from "../src/stats.js";
+import { compareIsoTimestamps } from "../src/timestamps.js";
 
 const trade = (overrides: Partial<Trade>): Trade => ({
   symbol: "BTC",
@@ -14,6 +15,26 @@ const trade = (overrides: Partial<Trade>): Trade => ({
 const statsFor = (trades: Trade[]) => computeStats([{ broker: "csv", equity: 0, positions: [], trades }]);
 
 describe("the trading stats derived from trades", () => {
+  it.each([
+    ["2026-10-06T14:00:00.1234Z", "2026-10-06T14:00:00.123456Z"],
+    ["2026-10-06T14:00:00Z", "2026-10-06T14:00:00.000007Z"],
+    ["2026-10-06T14:00:00.123456789001Z", "2026-10-06T14:00:00.123456789002Z"],
+    ["2026-10-06T08:00:00.1234-06:00", "2026-10-06T14:00:00.123456Z"],
+  ])("matches mixed-precision fills in chronological order (%s, %s)", (buyAt, sellAt) => {
+    const buy = trade({ side: "buy", price: 100, executedAt: buyAt });
+    const sell = trade({ side: "sell", price: 150, executedAt: sellAt });
+    expect(matchRoundTrips([sell, buy])).toEqual([{ pnl: 50 }]);
+    expect(matchRoundTrips([buy, sell])).toEqual([{ pnl: 50 }]);
+  });
+
+  it("treats trailing fractional zeros as the same instant and preserves input order for ties", () => {
+    expect(compareIsoTimestamps("2026-10-06T14:00:00.1234Z", "2026-10-06T14:00:00.123400Z")).toBe(0);
+    expect(matchRoundTrips([
+      trade({ side: "buy", price: 100, executedAt: "2026-10-06T14:00:00.1234Z" }),
+      trade({ side: "sell", price: 150, executedAt: "2026-10-06T14:00:00.123400Z" }),
+    ])).toEqual([{ pnl: 50 }]);
+  });
+
   it("count a completed buy-then-sell round trip as one win when it closed higher", () => {
     const stats = statsFor([
       trade({ side: "buy", price: 100, executedAt: "2026-01-01T00:00:00Z" }),

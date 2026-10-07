@@ -10,6 +10,12 @@ import type {
 import { makeAccount, makePosition, makeSnapshot, makeTrade } from "./sync-helpers.js";
 
 describe("tradeKey", () => {
+  it("prefers native fill IDs even when timestamp formatting or other fields change", () => {
+    expect(tradeKey(makeTrade({ executionId: "synthetic-1" }))).toBe("id:synthetic-1");
+    expect(tradeKey(makeTrade({ executionId: "synthetic-1", price: 201 }))).toBe("id:synthetic-1");
+    expect(tradeKey(makeTrade({ executionId: "synthetic-2" }))).not.toBe("id:synthetic-1");
+  });
+
   it("keys on symbol, side, quantity, price, and executedAt", () => {
     const trade = makeTrade();
     expect(tradeKey(trade)).toBe("AAPL|buy|10|200|2026-08-28T10:00:00.000Z");
@@ -32,6 +38,67 @@ describe("tradeKey", () => {
 });
 
 describe("diffSnapshots", () => {
+  const topstepSnapshot = (trades: ReturnType<typeof makeTrade>[]) => makeSnapshot({
+    broker: "topstep",
+    accounts: [makeAccount({ trades })],
+  });
+
+  it("does not replay an unchanged Topstep fill when upgrading a millisecond-only snapshot", () => {
+    const oldFill = makeTrade({ executedAt: "2026-10-06T14:45:36.246Z" });
+    const preciseFill = { ...oldFill, executionId: "100", instrumentId: "CON.F.US.EP.U26",
+      executedAt: "2026-10-06T14:45:36.246377Z" };
+    const upgraded = topstepSnapshot([preciseFill]);
+    expect(diffSnapshots(topstepSnapshot([oldFill]), upgraded)).toEqual([]);
+    expect(diffSnapshots(upgraded, upgraded)).toEqual([]);
+  });
+
+  it("preserves occurrence counts during the precision/identity transition", () => {
+    const oldFill = makeTrade({ executedAt: "2026-10-06T14:45:36.246Z" });
+    const fills = ["100", "101", "102"].map((executionId) => ({
+      ...oldFill, executionId, instrumentId: "CON.F.US.EP.U26", executedAt: "2026-10-06T14:45:36.246377Z",
+    }));
+    const events = diffSnapshots(topstepSnapshot([oldFill, { ...oldFill }]), topstepSnapshot(fills));
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ type: "trade_executed", trade: { executionId: "102" } });
+  });
+
+  it("reserves exact matches before consuming coarse legacy occurrences", () => {
+    const oldFill = makeTrade({ executedAt: "2026-10-06T14:45:36.246Z" });
+    const newFill = { ...oldFill, executionId: "new", instrumentId: "CON.F.US.EP.U26",
+      executedAt: "2026-10-06T14:45:36.246377Z" };
+    const events = diffSnapshots(topstepSnapshot([oldFill]), topstepSnapshot([newFill, oldFill]));
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ type: "trade_executed", trade: { executionId: "new" } });
+  });
+
+  it("does not merge different native IDs within the same millisecond", () => {
+    const base = makeTrade({ instrumentId: "CON.F.US.EP.U26", executedAt: "2026-10-06T14:45:36.246377Z" });
+    const first = { ...base, executionId: "100" };
+    const second = { ...base, executionId: "101" };
+    const events = diffSnapshots(topstepSnapshot([first]), topstepSnapshot([second]));
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ type: "trade_executed", trade: { executionId: "101" } });
+  });
+
+  it("does not match IDs across accounts", () => {
+    const fill = makeTrade({ executionId: "100" });
+    const previous = makeSnapshot({ accounts: [
+      makeAccount({ id: "one", trades: [fill] }), makeAccount({ id: "two" }),
+    ] });
+    const next = makeSnapshot({ accounts: [
+      makeAccount({ id: "one", trades: [fill] }), makeAccount({ id: "two", trades: [fill] }),
+    ] });
+    expect(diffSnapshots(previous, next)).toEqual([
+      expect.objectContaining({ type: "trade_executed", accountId: "two" }),
+    ]);
+  });
+
+  it("limits the coarse transition fallback to Topstep", () => {
+    const previous = makeSnapshot({ accounts: [makeAccount({ trades: [makeTrade()] })] });
+    const next = makeSnapshot({ accounts: [makeAccount({ trades: [makeTrade({ executionId: "100" })] })] });
+    expect(diffSnapshots(previous, next)).toHaveLength(1);
+  });
+
   it("emits nothing for the first-ever snapshot (baseline only)", () => {
     const next = makeSnapshot({
       accounts: [
