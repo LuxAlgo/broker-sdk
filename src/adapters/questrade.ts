@@ -7,9 +7,10 @@ import type { BrokerAdapter, Credentials, FetchContext } from "./types.js";
   Questrade (Canada), read-only via the user's own API refresh token
   (generated self-serve in Questrade's API centre). The token is single-use:
   every exchange returns a fresh access token AND a fresh refresh token, so
-  the rotated pair is handed back through rotatedCredentials — persist it
-  before the old one dies. Accounts, balances, positions, and the last month
-  of trade activities.
+  the replacement refresh token must be persisted immediately, before any
+  later request can fail. Direct callers without a rotation callback receive
+  rotatedCredentials on success. Accounts, balances, positions, and the last
+  month of trade activities.
 */
 
 const QUESTRADE_LOGIN = "https://login.questrade.com";
@@ -123,6 +124,10 @@ const fetchRaw = async (credentials: Credentials, ctx: FetchContext) => {
     throw new BrokerRequestError("questrade", "Questrade returned an incomplete token exchange");
   }
 
+  // History requests can fail after this single-use token has been consumed.
+  // Persist the replacement before making any of those requests.
+  await ctx.onCredentialsRotated?.({ refreshToken: tokens.refresh_token });
+
   const get = async <T>(path: string): Promise<T> => {
     const response = await ctx.fetch(`${apiServer}v1${path}`, {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -156,8 +161,8 @@ const fetchRaw = async (credentials: Credentials, ctx: FetchContext) => {
 
   return {
     raw: { accounts },
-    // The old refresh token is now dead — persist the rotated one.
-    rotatedCredentials: { refreshToken: tokens.refresh_token },
+    // Compatibility for direct adapter callers without the immediate callback.
+    ...(ctx.onCredentialsRotated ? {} : { rotatedCredentials: { refreshToken: tokens.refresh_token } }),
   };
 };
 
@@ -166,7 +171,7 @@ export const questrade: BrokerAdapter<QuestradeRaw> = {
   displayName: "Questrade",
   credentials: [{ key: "refreshToken", label: "API refresh token", secret: true }],
   readOnlySetup:
-    "Generate a refresh token in Questrade's API centre. Tokens are single-use and rotate on every fetch — persist rotatedCredentials (see onCredentialsRotated) or the connection dies.",
+    "Generate a refresh token in Questrade's API centre. Tokens are single-use and rotate on every fetch — persist them with onCredentialsRotated or the connection dies.",
   fetchRaw,
   normalize,
 };

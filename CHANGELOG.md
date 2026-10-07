@@ -12,6 +12,7 @@ These schema additions are intended for the next minor release; the package vers
 - Topstep compatibility: timestamps without `Z` or a numeric offset now leave `executedAt` absent instead of using the host's local timezone. A negative `fees` or `commissions` component omits the entire `fee`, even when the other component is positive, because negative component semantics are undocumented.
 - Sync: prefer native fill IDs within each account. Match pre-upgrade Topstep snapshots using millisecond timestamps and occurrence counts, reserving exact matches first. Old fills with identical legacy fields cannot be individually identified during migration.
 - Stats: compare mixed-length fractional timestamps chronologically without losing sub-millisecond digits. Topstep fraction parsing no longer relies on engines accepting more than three digits in `Date.parse`.
+- Questrade: update in-memory credentials and await persistence immediately after single-use token exchange, before account/history requests. Persistence failures propagate and stop further requests. Direct adapter consumers can use `FetchContext.onCredentialsRotated`; consumers without it retain `rotatedCredentials` on success.
 
 ## 0.5.1
 

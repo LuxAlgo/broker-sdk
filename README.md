@@ -185,7 +185,7 @@ const positions = positionsFromTrades(trades);
 
 - **Your keys stay yours.** The SDK runs where your code runs. There is no LuxAlgo server in the path, no telemetry, no phoning home. We don't want your keys.
 - **Read-only by default.** The root export reads accounts, balances, positions, and history. Nothing in it can place an order.
-- **Credential rotation is first-class.** Brokers with single-use tokens (Questrade) hand the rotated credentials back through `onCredentialsRotated` so you can persist them before the old ones die.
+- **Credential rotation is first-class.** Questrade updates in-memory credentials and awaits `onCredentialsRotated` before account/history requests. Persist the replacement there; callback errors abort further requests. See [the rotation recipe](docs/recipes.md#persist-snapshots-and-survive-token-rotation).
 - **Fail-soft, never fabricate.** A position the broker can't price has no `marketValue` rather than a made-up one. A history row that can't be read is skipped and counted, not guessed.
 
 ## Give your AI agent portfolio access
@@ -215,6 +215,11 @@ npx broker-sync --interval 300 --webhook-url https://example.com/hooks/portfolio
 ```
 
 Events are `trade_executed`, `balance_changed`, `position_opened`, `position_closed`, `position_changed`, `broker_error`, and `sync_completed`, delivered per sweep as one JSON batch. When a secret is configured, every webhook request carries `X-BrokerSync-Signature`, the lowercase hex HMAC-SHA256 of the raw body. State persists to a local JSON file before delivery, so a crash can drop a batch but never replay one. Programmatic use lives at `@luxalgo/broker-sdk/sync`.
+
+The CLI keeps rotated credentials in memory while running, but never stores them
+in snapshot state or updates its environment/config file. For Questrade tokens
+that must survive restarts, supply SDK connections with a persistence callback
+to the programmatic daemon; see [the rotation recipe](docs/recipes.md#persist-snapshots-and-survive-token-rotation).
 
 ## Place orders (experimental)
 

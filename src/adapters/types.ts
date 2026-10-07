@@ -10,13 +10,19 @@ export type NormalizationContext = {
 /** Injected IO — lets callers supply a custom fetch (proxies, tests). */
 export type FetchContext = {
   fetch: typeof globalThis.fetch;
+  /**
+   * Awaited by supporting adapters immediately after rotation, before further IO.
+   * Receives rotated fields to merge into existing credentials. Rejection aborts the fetch.
+   */
+  onCredentialsRotated?: (credentials: Credentials) => void | Promise<void>;
 };
 
 export type AdapterFetchResult<Raw> = {
   raw: Raw;
   /**
-   * Rotated credentials the caller must persist before the old ones die
-   * (e.g. Questrade refresh tokens are single-use).
+   * Rotated credentials the caller must persist. Questrade returns this
+   * only when no onCredentialsRotated callback is supplied; its old token
+   * is already invalid after exchange.
    */
   rotatedCredentials?: Credentials;
 };
