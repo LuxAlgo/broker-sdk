@@ -31,15 +31,23 @@ export type Position = {
 
 /** One executed trade (a fill), always from the account holder's side. */
 export type Trade = {
+  /** Deterministic numeric tie-break key for equal timestamps; not necessarily chronological. */
+  executionTieBreak?: number;
+  /** Provider-reported realized gross P&L on this fill, in account currency. */
+  reportedGrossPnl?: number;
+  /** Native fill identifier, unique within its broker account. Not an order ID. */
+  executionId?: string;
+  /** Native instrument identifier, when available (for example a futures contract). */
+  instrumentId?: string;
   symbol: string;
   side: "buy" | "sell";
   /** Always positive — `side` carries the direction. */
   quantity: number;
   /** Price per unit in the account's `currency`. */
   price: number;
-  /** Commission/fee paid, when the source reports one. */
+  /** Total reported fees and commissions, as a non-negative cost; zero may be explicit. */
   fee?: number;
-  /** ISO 8601 timestamp, when the source carried one. */
+  /** ISO 8601 timestamp, when the source carried one; may retain sub-millisecond precision. */
   executedAt?: string;
 };
 

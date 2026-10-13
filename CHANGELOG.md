@@ -2,6 +2,18 @@
 
 All notable changes to `@luxalgo/broker-sdk` are documented here.
 
+## Unreleased
+
+These schema additions are intended for the next minor release; the package version is unchanged until release preparation.
+
+- Trade schema: optional native fill/instrument identity, a deterministic numeric tie-break key (`executionTieBreak`, not a chronology guarantee), and provider-reported realized gross P&L.
+- Topstep: preserve fill IDs, full contract IDs, and sub-millisecond UTC timestamps; include reported fees plus commissions and distinguish explicit zero from unknown costs; expose `profitAndLoss` as `reportedGrossPnl`; reject `success: false` JSON responses even with HTTP 200. Provider array order and automatic discovery of all returned accounts are preserved.
+- Topstep: malformed JSON bodies raise typed request errors. Failed searches abort the snapshot instead of appearing as empty positions/history, preventing false position-closure events. Both cost fields exist in the published API schema; their additive interpretation remains an accounting assumption.
+- Topstep compatibility: timestamps without `Z` or a numeric offset now leave `executedAt` absent instead of using the host's local timezone. A negative `fees` or `commissions` component omits the entire `fee`, even when the other component is positive, because negative component semantics are undocumented.
+- Sync: prefer native fill IDs within each account. Match pre-upgrade Topstep snapshots using millisecond timestamps and occurrence counts, reserving exact matches first. Old fills with identical legacy fields cannot be individually identified during migration.
+- Stats: compare mixed-length fractional timestamps chronologically without losing sub-millisecond digits. Topstep fraction parsing no longer relies on engines accepting more than three digits in `Date.parse`.
+- Questrade: update in-memory credentials and await persistence immediately after single-use token exchange, before account/history requests. Persistence failures propagate and stop further requests. Direct adapter consumers can use `FetchContext.onCredentialsRotated`; consumers without it retain `rotatedCredentials` on success.
+
 ## 0.5.1
 
 - IBKR Flex XML: optional `statementTimeZone` on `connect()` and `parseFlexStatement()` interprets timestamps without offsets in the selected IANA timezone, including daylight saving. Existing callers retain the UTC default. Explicit UTC/numeric offsets are honored; invalid, ambiguous, or nonexistent local timestamps leave `executedAt` absent.

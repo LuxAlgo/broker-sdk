@@ -9,15 +9,24 @@
   an already-known broker snapshot.
 */
 import type { BrokerSnapshot, Trade } from "../index.js";
+import { asPreciseIsoTimestamp } from "../timestamps.js";
 import type { SyncEvent } from "./events.js";
 
 /**
- * Identity of one trade for diffing: symbol + side + quantity + price +
- * executedAt. Two fills identical on all five fields collide, so the diff
- * counts occurrences per key instead of assuming keys are unique.
+ * Prefer account-scoped native fill identity; otherwise use the original
+ * symbol/side/quantity/price/timestamp tuple. Occurrence counting preserves
+ * duplicate fills even when a provider supplies no unique ID.
  */
 export const tradeKey = (trade: Trade): string =>
-  [trade.symbol, trade.side, String(trade.quantity), String(trade.price), trade.executedAt ?? ""].join("|");
+  trade.executionId ? `id:${trade.executionId}` : legacyTradeKey(trade);
+
+const legacyTradeKey = (trade: Trade, timestamp = trade.executedAt ?? ""): string =>
+  [trade.symbol, trade.side, String(trade.quantity), String(trade.price), timestamp].join("|");
+
+const millisecondTradeKey = (trade: Trade): string => {
+  const timestamp = asPreciseIsoTimestamp(trade.executedAt) ?? trade.executedAt ?? "";
+  return legacyTradeKey(trade, timestamp.replace(/(\.\d{3})\d+Z$/, "$1Z"));
+};
 
 /**
  * Diff two snapshots of the same broker into events. Accounts are matched
@@ -41,19 +50,39 @@ export const diffSnapshots = (previous: BrokerSnapshot | undefined, next: Broker
     // Trades: anything in `next` not matched by a remaining occurrence in
     // `previous` is new. Occurrence counting keeps duplicate identical
     // fills honest in both directions.
-    const remaining = new Map<string, number>();
+    const remaining = new Map<string, Trade[]>();
     for (const trade of before.trades) {
       const key = tradeKey(trade);
-      remaining.set(key, (remaining.get(key) ?? 0) + 1);
+      const fills = remaining.get(key) ?? [];
+      fills.push(trade);
+      remaining.set(key, fills);
     }
+    // Reserve exact matches first so a coarse legacy match cannot steal one.
+    const unmatched: Trade[] = [];
     for (const trade of account.trades) {
-      const key = tradeKey(trade);
-      const count = remaining.get(key) ?? 0;
-      if (count > 0) {
-        remaining.set(key, count - 1);
+      const fills = remaining.get(tradeKey(trade));
+      if (fills && fills.length > 0) {
+        fills.pop();
       } else {
-        events.push({ type: "trade_executed", broker, accountId, at, trade });
+        unmatched.push(trade);
       }
+    }
+    const legacy = new Map<string, number>();
+    if (broker === "topstep") {
+      for (const fills of remaining.values()) {
+        for (const trade of fills) {
+          // Pre-upgrade snapshots had neither native identity nor full contracts.
+          if (trade.executionId || trade.instrumentId) continue;
+          const key = millisecondTradeKey(trade);
+          legacy.set(key, (legacy.get(key) ?? 0) + 1);
+        }
+      }
+    }
+    for (const trade of unmatched) {
+      const key = millisecondTradeKey(trade);
+      const count = legacy.get(key) ?? 0;
+      if (count > 0) legacy.set(key, count - 1);
+      else events.push({ type: "trade_executed", broker, accountId, at, trade });
     }
 
     // Balance.

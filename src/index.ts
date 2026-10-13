@@ -54,7 +54,8 @@ export type ConnectOptions<B extends BrokerId = BrokerId> = {
   /**
    * Called when a fetch rotates the stored credentials (e.g. Questrade
    * refresh tokens are single-use). Persist the new value here, or the next
-   * fetch fails.
+   * fetch fails. Questrade awaits this immediately after token exchange,
+   * before fetching accounts or history; rejection aborts the fetch.
    */
   onCredentialsRotated?: (credentials: Credentials) => void | Promise<void>;
 };
@@ -62,7 +63,7 @@ export type ConnectOptions<B extends BrokerId = BrokerId> = {
 export type BrokerConnection = {
   readonly broker: BrokerId;
   readonly label: string;
-  /** Current credentials — reflects rotation after each fetch. */
+  /** Current credentials — reflects rotation even if a later request or persistence fails. */
   readonly credentials: Credentials;
   /** Fetch a fresh normalized snapshot straight from the broker. */
   fetchSnapshot: () => Promise<BrokerSnapshot>;
@@ -93,7 +94,14 @@ export const connect = <B extends BrokerId>(options: ConnectOptions<B>): BrokerC
 
 const createConnection = (adapter: AnyBrokerAdapter, options: ConnectOptions): BrokerConnection => {
   let credentials: Credentials = { ...(options.credentials as Credentials) };
-  const ctx: FetchContext = { fetch: options.fetch ?? globalThis.fetch };
+  const onCredentialsRotated = async (next: Credentials): Promise<void> => {
+    credentials = { ...credentials, ...next };
+    await options.onCredentialsRotated?.({ ...credentials });
+  };
+  const ctx: FetchContext = {
+    fetch: options.fetch ?? globalThis.fetch,
+    onCredentialsRotated,
+  };
   const normalization = adapter.id === "ibkr-flex"
     ? { statementTimeZone: ibkrTimeZone(options.statementTimeZone) }
     : undefined;
@@ -101,8 +109,7 @@ const createConnection = (adapter: AnyBrokerAdapter, options: ConnectOptions): B
   const fetchSnapshot = async (): Promise<BrokerSnapshot> => {
     const result = await adapter.fetchRaw(credentials, ctx);
     if (result.rotatedCredentials) {
-      credentials = { ...credentials, ...result.rotatedCredentials };
-      await options.onCredentialsRotated?.(credentials);
+      await onCredentialsRotated(result.rotatedCredentials);
     }
     return {
       broker: adapter.id,

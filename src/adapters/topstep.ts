@@ -1,6 +1,7 @@
 import { BrokerAuthError, BrokerRequestError, MissingCredentialsError } from "../errors.js";
 import type { Account, Position, Trade } from "../schema.js";
-import { asFiniteNumber, asIsoTimestamp, rejectResponse } from "./http.js";
+import { asPreciseIsoTimestamp } from "../timestamps.js";
+import { asFiniteNumber, rejectResponse } from "./http.js";
 import type { BrokerAdapter, Credentials, FetchContext } from "./types.js";
 
 /*
@@ -15,10 +16,13 @@ const TOPSTEP_API = "https://api.topstepx.com/api";
 const TRADE_WINDOW_DAYS = 30;
 
 type TopstepTradeRow = {
+  id?: number | string;
   contractId?: string;
   creationTimestamp?: string;
   price?: number;
   fees?: number;
+  commissions?: number;
+  profitAndLoss?: number | null;
   side?: number;
   size?: number;
   voided?: boolean;
@@ -50,14 +54,32 @@ export const parseTopstepTrades = (trades: TopstepTradeRow[] | undefined): Trade
     const quantity = Math.abs(trade.size ?? 0);
     const price = trade.price ?? 0;
     if (!trade.contractId || !side || quantity <= 0 || price <= 0) continue;
-    const fee = Math.abs(trade.fees ?? 0);
-    const executedAt = asIsoTimestamp(trade.creationTimestamp);
+    const fees = asFiniteNumber(trade.fees);
+    const commissions = asFiniteNumber(trade.commissions);
+    // The API does not specify negative component semantics; don't invent a charge.
+    const fee = (fees !== undefined || commissions !== undefined)
+      && (fees ?? 0) >= 0 && (commissions ?? 0) >= 0
+      ? (fees ?? 0) + (commissions ?? 0)
+      : undefined;
+    const reportedGrossPnl = asFiniteNumber(trade.profitAndLoss);
+    const executedAt = asPreciseIsoTimestamp(trade.creationTimestamp);
     mapped.push({
+      ...(typeof trade.id === "string" && trade.id.length > 0
+        ? { executionId: trade.id }
+        : typeof trade.id === "number" && Number.isSafeInteger(trade.id)
+          ? { executionId: String(trade.id) }
+          : {}),
+      // Numeric IDs give a repeatable tie-break, not a documented execution sequence.
+      ...(typeof trade.id === "number" && Number.isSafeInteger(trade.id) && trade.id >= 0
+        ? { executionTieBreak: trade.id }
+        : {}),
+      ...(reportedGrossPnl !== undefined ? { reportedGrossPnl } : {}),
+      instrumentId: trade.contractId,
       symbol: topstepSymbol(trade.contractId),
       side,
       quantity,
       price,
-      ...(fee > 0 ? { fee } : {}),
+      ...(fee !== undefined ? { fee } : {}),
       ...(executedAt ? { executedAt } : {}),
     });
   }
@@ -110,7 +132,19 @@ const fetchRaw = async (credentials: Credentials, ctx: FetchContext) => {
       body: JSON.stringify(body),
     });
     if (!response.ok) rejectResponse("topstep", "Topstep", response);
-    return (await response.json()) as T;
+    const result: unknown = await response.json();
+    if (typeof result !== "object" || result === null || Array.isArray(result)) {
+      throw new BrokerRequestError("topstep", `Topstep returned an invalid response for ${path}`);
+    }
+    const envelope = result as { success?: boolean; errorMessage?: string | null };
+    if (envelope.success === false) {
+      const message = envelope.errorMessage || `Topstep rejected ${path}`;
+      // Before authentication, rejection is an auth error; endpoint business
+      // error codes are endpoint-specific and must not be guessed from text.
+      if (!token) throw new BrokerAuthError("topstep", message);
+      throw new BrokerRequestError("topstep", message);
+    }
+    return result as T;
   };
 
   type TopstepLogin = { token?: string; success?: boolean; errorMessage?: string | null };
