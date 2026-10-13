@@ -1,5 +1,5 @@
 /*
-  @luxalgo/broker-sync — a tiny self-hosted refresh daemon and webhook
+  @luxalgo/broker-sdk/sync — a tiny self-hosted refresh daemon and webhook
   emitter on top of @luxalgo/broker-sdk. Public API: the event union, the
   pure diff engine, state persistence, sinks, config resolution, and the
   daemon factory. The CLI lives in cli.ts and is not exported here.

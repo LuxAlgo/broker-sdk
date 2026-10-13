@@ -189,10 +189,10 @@ The security contract in one sentence: credentials go only to your `onComplete` 
 
 ## Sync daemon and webhooks
 
-Run `npx broker-sync` with your keys in `BROKERS_*` env vars (e.g. `BROKERS_ALPACA_API_KEY`, `BROKERS_ALPACA_API_SECRET`, the same convention as the MCP server) and it polls your brokers on an interval, diffs each snapshot against the last, and emits only what changed.
+Run `npx -p @luxalgo/broker-sdk broker-sync` with your keys in `BROKERS_*` env vars (e.g. `BROKERS_ALPACA_API_KEY`, `BROKERS_ALPACA_API_SECRET`, the same convention as the MCP server) and it polls your brokers on an interval, diffs each snapshot against the last, and emits only what changed.
 
 ```bash
-npx broker-sync --interval 300 --webhook-url https://example.com/hooks/portfolio --webhook-secret change-me
+npx -p @luxalgo/broker-sdk broker-sync --interval 300 --webhook-url https://example.com/hooks/portfolio --webhook-secret change-me
 ```
 
 Events are `trade_executed`, `balance_changed`, `position_opened`, `position_closed`, `position_changed`, `broker_error`, and `sync_completed`, delivered per sweep as one JSON batch. When a secret is configured, every webhook request carries `X-BrokerSync-Signature`, the lowercase hex HMAC-SHA256 of the raw body. State persists to a local JSON file before delivery, so a crash can drop a batch but never replay one. Programmatic use lives at `@luxalgo/broker-sdk/sync`.
