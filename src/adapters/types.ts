@@ -10,6 +10,8 @@ export type NormalizationContext = {
 /** Injected IO — lets callers supply a custom fetch (proxies, tests). */
 export type FetchContext = {
   fetch: typeof globalThis.fetch;
+  /** ISO 8601 lower bound for paged trade history; adapters without paging ignore it. */
+  historySince?: string;
 };
 
 export type AdapterFetchResult<Raw> = {

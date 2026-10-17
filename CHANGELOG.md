@@ -2,6 +2,20 @@
 
 All notable changes to `@luxalgo/broker-sdk` are documented here.
 
+## Unreleased
+
+### Fixed
+
+- **Webull:** moved to the `/trading/*` routes with `x-version: v3`, the routes Webull's official SDK uses. Webull's gateway picks the backend from that header. The `/openapi/account/*` paths answered `404 Route Not Found`, and the v1 balance and positions routes returned 404 for accounts that were otherwise valid, so every Webull connection failed with "Webull rejected the request (404)".
+- **Webull:** equity is read from `total_net_liquidation_value`, the v3 balance field, and no longer reports 0.
+- **Webull:** rate-limited requests (429) are retried with exponential backoff.
+
+### Added
+
+- **Webull trade history** from `/trading/orders/historical-orders/list`. The adapter walks 30-day windows, follows `pagination_key`, looks back 365 days on first sync, and stops cleanly at Webull's retention limit. Each filled order becomes one trade at its average fill price, with fees summed. Single-leg options get OCC-style symbols (`TSLA 260925P375`). Multi-leg orders and orders still working are skipped.
+- `Trade.assetClass`, `Trade.multiplier` and `Trade.positionEffect`. All three are optional and set only when the broker states them.
+- `historySince` on `connect()` (and `FetchContext`): a lower bound for brokers that page through history, so later syncs fetch only recent orders.
+
 ## 0.5.1
 
 - IBKR Flex XML: optional `statementTimeZone` on `connect()` and `parseFlexStatement()` interprets timestamps without offsets in the selected IANA timezone, including daylight saving. Existing callers retain the UTC default. Explicit UTC/numeric offsets are honored; invalid, ambiguous, or nonexistent local timestamps leave `executedAt` absent.

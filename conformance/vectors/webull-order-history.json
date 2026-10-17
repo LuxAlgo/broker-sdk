@@ -1,0 +1,150 @@
+{
+  "broker": "webull",
+  "description": "Live /trading/* (x-version v3) payload shapes, redacted. Equity comes from total_net_liquidation_value. Historical orders become trades: one per filled order at the average fill price, fees summed across the fee array plus commission. Single-leg options get an OCC-style symbol plus multiplier, and position_intent sets positionEffect. The fixture also covers skipped rows: a cancelled order with no fill, a multi-leg option order that carries only a net price, and an order that is still partially filled.",
+  "raw": {
+    "accounts": [
+      {
+        "accountId": "W000EXAMPLE",
+        "balance": {
+          "total_asset_currency": "USD",
+          "total_net_liquidation_value": "2500.00",
+          "total_market_value": "1000.00",
+          "total_cash_balance": "1500.00",
+          "account_currency_assets": [{ "currency": "USD", "net_liquidation_value": "2500.00" }]
+        },
+        "positions": { "data": [{ "symbol": "DEF", "quantity": "25", "market_value": "1250.00" }] },
+        "orders": [
+          {
+            "symbol": "XYZ",
+            "side": "BUY",
+            "status": "FILLED",
+            "instrument_type": "OPTION",
+            "option_strategy": "SINGLE",
+            "position_intent": "BUY_TO_OPEN",
+            "legs": [
+              {
+                "id": "LEG1",
+                "quantity": "1",
+                "side": "BUY",
+                "symbol": "XYZ",
+                "option_type": "PUT",
+                "option_expire_date": "2026-09-25",
+                "strike_price": "50.00",
+                "option_contract_multiplier": "100"
+              }
+            ],
+            "fees": [
+              { "type": "REGULATORY_FEE", "actual_value": "0.02", "receivable_value": "0.02" },
+              { "type": "CLEARING_FEE", "actual_value": "0.03", "receivable_value": "0.03" }
+            ],
+            "commission": {},
+            "order_type": "LIMIT",
+            "total_quantity": "1",
+            "filled_quantity": "1",
+            "filled_price": "1.10",
+            "filled_time": "1790000000000",
+            "filled_time_at": "2026-09-25T14:00:00.000Z"
+          },
+          {
+            "symbol": "ABC",
+            "side": "SELL",
+            "status": "FILLED",
+            "instrument_type": "EQUITY",
+            "fees": [
+              { "type": "SEC_FEE", "actual_value": "0.04" },
+              { "type": "FINRA_FEE", "actual_value": "0.01" }
+            ],
+            "commission": {},
+            "total_quantity": "7",
+            "filled_quantity": "7",
+            "filled_price": "20.00",
+            "filled_time_at": "2026-09-25T15:00:00.000Z"
+          },
+          {
+            "symbol": "COINUSD",
+            "side": "SELL",
+            "status": "FILLED",
+            "instrument_type": "CRYPTO",
+            "order_type": "MARKET",
+            "total_quantity": "5.5",
+            "filled_quantity": "5.5",
+            "filled_price": "120.5",
+            "filled_time_at": "2026-09-26T01:00:00.000Z"
+          },
+          {
+            "symbol": "AAPL",
+            "side": "BUY",
+            "status": "CANCELLED",
+            "instrument_type": "EQUITY",
+            "total_quantity": "10",
+            "filled_quantity": "0",
+            "filled_price": "0"
+          },
+          {
+            "symbol": "SPY",
+            "side": "BUY",
+            "status": "FILLED",
+            "instrument_type": "OPTION",
+            "option_strategy": "VERTICAL",
+            "legs": [
+              { "option_type": "CALL", "option_expire_date": "2026-10-01", "strike_price": "600" },
+              { "option_type": "CALL", "option_expire_date": "2026-10-01", "strike_price": "605" }
+            ],
+            "filled_quantity": "1",
+            "filled_price": "1.25",
+            "filled_time_at": "2026-09-26T15:00:00.000Z"
+          },
+          {
+            "symbol": "NVDA",
+            "side": "BUY",
+            "status": "PARTIAL_FILLED",
+            "instrument_type": "EQUITY",
+            "total_quantity": "10",
+            "filled_quantity": "4",
+            "filled_price": "180.10",
+            "filled_time_at": "2026-09-28T14:00:00.000Z"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "W000EXAMPLE",
+      "name": "Webull W000EXAMPLE",
+      "currency": "USD",
+      "equity": 2500,
+      "positions": [{ "symbol": "DEF", "quantity": 25, "marketValue": 1250 }],
+      "trades": [
+        {
+          "symbol": "XYZ 260925P50",
+          "side": "buy",
+          "quantity": 1,
+          "price": 1.1,
+          "fee": 0.05,
+          "executedAt": "2026-09-25T14:00:00.000Z",
+          "assetClass": "option",
+          "multiplier": 100,
+          "positionEffect": "open"
+        },
+        {
+          "symbol": "ABC",
+          "side": "sell",
+          "quantity": 7,
+          "price": 20,
+          "fee": 0.05,
+          "executedAt": "2026-09-25T15:00:00.000Z",
+          "assetClass": "equity"
+        },
+        {
+          "symbol": "COINUSD",
+          "side": "sell",
+          "quantity": 5.5,
+          "price": 120.5,
+          "executedAt": "2026-09-26T01:00:00.000Z",
+          "assetClass": "crypto"
+        }
+      ]
+    }
+  ]
+}
