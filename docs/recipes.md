@@ -67,12 +67,25 @@ import { connect } from "@luxalgo/broker-sdk";
 const connection = connect({
   broker: "questrade",
   credentials: { refreshToken: loadToken() },
-  // Questrade tokens are single-use: persist the rotation or the next fetch dies.
+  // Awaited immediately after exchange, before any account/history requests.
   onCredentialsRotated: (next) => saveToken(next.refreshToken),
 });
 const snapshot = await connection.fetchSnapshot();
 await db.upsert("accounts", snapshot.accounts); // Account.id is a stable upsert key
 ```
+
+`saveToken` must return its persistence promise so the SDK can await it.
+Questrade's old refresh token is invalid after exchange. The replacement is
+already in `connection.credentials` even if persistence or a later request
+fails; a persistence error stops further provider requests. Avoid concurrent
+fetches sharing a single-use token.
+
+Direct `questrade.fetchRaw(credentials, { fetch, onCredentialsRotated })`
+consumers can supply the same awaited callback, which receives the rotated
+credential fields. Without it, successful calls retain the legacy
+`rotatedCredentials` result, but a later request failure prevents that result
+from being returned. With a callback, rotation is delivered only through the
+callback. Other adapters retain their existing rotation timing.
 
 ## Give your agent read access (MCP)
 

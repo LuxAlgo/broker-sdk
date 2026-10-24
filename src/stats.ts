@@ -1,4 +1,5 @@
 import type { Account, Position, Trade } from "./schema.js";
+import { compareIsoTimestamps } from "./timestamps.js";
 
 /*
   The stats engine: FIFO round-trip matching, win rate, per-symbol activity.
@@ -43,7 +44,7 @@ export type StatsAccount = Pick<Account, "equity" | "positions" | "trades"> & {
 
 /** FIFO-match sells against prior buys; returns per-round-trip results. */
 export const matchRoundTrips = (trades: Trade[]): { pnl: number }[] => {
-  const sorted = [...trades].sort((a, b) => (a.executedAt ?? "").localeCompare(b.executedAt ?? ""));
+  const sorted = [...trades].sort((a, b) => compareIsoTimestamps(a.executedAt, b.executedAt));
   const openLots = new Map<string, { quantity: number; price: number }[]>();
   const roundTrips: { pnl: number }[] = [];
 

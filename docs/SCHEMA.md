@@ -32,11 +32,35 @@ One shape for everything, regardless of broker. This document is the human-reada
 | Field | Type | Notes |
 | --- | --- | --- |
 | `symbol` | `string` | Same normalization as positions. |
+| `executionId?` | `string` | Native fill identifier, scoped to the broker account; never substituted with an order ID. |
+| `instrumentId?` | `string` | Native instrument identifier, such as Topstep's full futures contract ID, including expiry. |
+| `executionTieBreak?` | `number` | Deterministic numeric tie-break key for equal timestamps. Does not imply chronological sequence unless the provider documents that guarantee. |
+| `reportedGrossPnl?` | `number` | Provider-reported realized gross P&L on this fill, in account currency, before fees/commissions. Omitted when unknown; zero and losses are preserved. |
 | `side` | `"buy" \| "sell"` | Always from the account holder's side. |
 | `quantity` | `number` | Always positive — `side` carries direction. |
 | `price` | `number` | Per unit, in the account's `currency`. |
-| `fee?` | `number` | Commission/fee, absolute value, only when reported and non-zero. |
-| `executedAt?` | `string` | ISO 8601, only when the source carried a parseable timestamp. |
+| `fee?` | `number` | Non-negative reported costs. Topstep sums available non-negative `fees` and `commissions`, preserving explicit zero; omitted when neither is known or either is negative. Other adapters may omit zero costs. |
+| `executedAt?` | `string` | ISO 8601, only when the source carried a parseable timestamp. Topstep normalizes offsets to UTC while retaining fractional precision beyond milliseconds. |
+
+Topstep's `executionTieBreak` uses non-negative safe-integer numeric fill IDs;
+the [API reference](https://gateway.docs.projectx.com/docs/api-reference/trade/trade-search/)
+does not guarantee their chronology. String IDs have no inferred ordering key;
+unsafe numeric IDs are omitted. Provider array order is preserved. Stats compares
+precise instants, preserving input order for ties; it does not use this key,
+contract IDs, or reported P&L to reconstruct futures results.
+
+Keep precise timestamps as strings: `Date` discards sub-millisecond digits.
+Sync uses native fill IDs and occurrence counts within each account. On upgrade,
+old Topstep fills without native metadata can match by the original trade fields
+and millisecond timestamp. Exact matches take precedence. Fills indistinguishable
+in the old data remain ambiguous during that transition. Other timestamp-keyed
+consumers must handle the precision change themselves.
+
+The [published Topstep API schema](https://api.topstepx.com/swagger/v1/swagger.json)
+declares both `fees` and optional `commissions`, but does not describe whether
+`fees` is inclusive. The adapter adds these fields as separate components;
+confirm totals against broker statements when accounting accuracy is required.
+Negative component semantics are also unspecified, so their total is omitted.
 
 ### Bar
 
