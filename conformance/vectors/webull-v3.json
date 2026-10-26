@@ -1,0 +1,307 @@
+{
+  "broker": "webull",
+  "description": "Documented v3 shapes. Equity comes from total_net_liquidation_value; positions value quantity at last price (times the contract size for options) and options take OCC-style symbols. Settled orders with a fill become trades at the average fill price with their fees, including a cancelled order's partial fill and a SHORT sale. Options carry their contract size and opened or closed. Skipped: an order still partially filling, a multi-leg order with one net price, an order seen twice, a filled order with no quantity and a cancelled order with no fill.",
+  "raw": {
+    "accounts": [
+      {
+        "accountId": "W000EXAMPLE",
+        "balance": {
+          "total_asset_currency": "USD",
+          "total_cash_balance": "9980.00",
+          "total_market_value": "465.00",
+          "total_net_liquidation_value": "12500.00",
+          "account_currency_assets": [
+            {
+              "currency": "USD",
+              "cash_balance": "9980.00",
+              "net_liquidation_value": "12500.00"
+            }
+          ]
+        },
+        "positions": [
+          {
+            "position_id": "P1",
+            "symbol": "ABC",
+            "quantity": "10",
+            "instrument_type": "EQUITY",
+            "last_price": "21.50",
+            "cost_price": "200.00",
+            "currency": "USD"
+          },
+          {
+            "position_id": "P2",
+            "symbol": "XYZ",
+            "quantity": "2",
+            "instrument_type": "OPTION",
+            "option_strategy": "SINGLE",
+            "last_price": "1.25",
+            "currency": "USD",
+            "legs": [
+              {
+                "leg_id": "L1",
+                "symbol": "XYZ",
+                "quantity": "2",
+                "option_type": "CALL",
+                "option_expire_date": "2026-12-18",
+                "option_exercise_price": "55",
+                "option_contract_multiplier": "100"
+              }
+            ]
+          },
+          {
+            "position_id": "P3",
+            "symbol": "FLAT",
+            "quantity": "0",
+            "instrument_type": "EQUITY",
+            "last_price": "5.00"
+          }
+        ],
+        "orders": [
+          {
+            "combo_type": "NORMAL",
+            "order_type": "LIMIT",
+            "time_in_force": "DAY",
+            "order_id": "O1",
+            "client_order_id": "C1",
+            "symbol": "ABC",
+            "side": "BUY",
+            "status": "FILLED",
+            "instrument_type": "EQUITY",
+            "total_quantity": "10",
+            "filled_quantity": "10",
+            "filled_price": "20.00",
+            "filled_time_at": "2026-09-21T14:00:00.000Z",
+            "fees": [
+              {
+                "type": "REGULATORY_FEE",
+                "actual_value": "0.01"
+              }
+            ],
+            "commission": {
+              "actual_value": "0"
+            }
+          },
+          {
+            "combo_type": "NORMAL",
+            "order_type": "LIMIT",
+            "time_in_force": "DAY",
+            "order_id": "O2",
+            "client_order_id": "C2",
+            "symbol": "ABC",
+            "side": "SHORT",
+            "status": "FILLED",
+            "instrument_type": "EQUITY",
+            "total_quantity": "5",
+            "filled_quantity": "5",
+            "filled_price": "21.00",
+            "filled_time": "1790010000000"
+          },
+          {
+            "combo_type": "NORMAL",
+            "order_type": "LIMIT",
+            "time_in_force": "DAY",
+            "order_id": "O3",
+            "client_order_id": "C3",
+            "symbol": "XYZ",
+            "side": "BUY",
+            "status": "FILLED",
+            "instrument_type": "OPTION",
+            "option_strategy": "SINGLE",
+            "position_intent": "BUY_TO_OPEN",
+            "total_quantity": "2",
+            "filled_quantity": "2",
+            "filled_price": "1.10",
+            "filled_time_at": "2026-09-22T15:30:00.000Z",
+            "legs": [
+              {
+                "id": "L1",
+                "symbol": "XYZ",
+                "side": "BUY",
+                "quantity": "2",
+                "option_type": "CALL",
+                "option_expire_date": "2026-12-18",
+                "strike_price": "55",
+                "option_contract_multiplier": "100"
+              }
+            ]
+          },
+          {
+            "combo_type": "NORMAL",
+            "order_type": "LIMIT",
+            "time_in_force": "DAY",
+            "order_id": "O4",
+            "client_order_id": "C4",
+            "symbol": "ABC",
+            "side": "SELL",
+            "status": "CANCELLED",
+            "instrument_type": "EQUITY",
+            "total_quantity": "10",
+            "filled_quantity": "3",
+            "filled_price": "22.00",
+            "filled_time_at": "2026-09-23T16:00:00.000Z"
+          },
+          {
+            "combo_type": "NORMAL",
+            "order_type": "LIMIT",
+            "time_in_force": "DAY",
+            "order_id": "O5",
+            "client_order_id": "C5",
+            "symbol": "ABC",
+            "side": "BUY",
+            "status": "PARTIAL_FILLED",
+            "instrument_type": "EQUITY",
+            "total_quantity": "10",
+            "filled_quantity": "4",
+            "filled_price": "19.50",
+            "filled_time_at": "2026-09-24T14:00:00.000Z"
+          },
+          {
+            "combo_type": "NORMAL",
+            "order_type": "LIMIT",
+            "time_in_force": "DAY",
+            "order_id": "O6",
+            "client_order_id": "C6",
+            "symbol": "SPY",
+            "side": "BUY",
+            "status": "FILLED",
+            "instrument_type": "OPTION",
+            "option_strategy": "VERTICAL",
+            "total_quantity": "1",
+            "filled_quantity": "1",
+            "filled_price": "1.25",
+            "filled_time_at": "2026-09-24T15:00:00.000Z",
+            "legs": [
+              {
+                "id": "L1",
+                "symbol": "SPY",
+                "side": "BUY",
+                "option_type": "CALL",
+                "option_expire_date": "2026-10-16",
+                "strike_price": "600"
+              },
+              {
+                "id": "L2",
+                "symbol": "SPY",
+                "side": "SELL",
+                "option_type": "CALL",
+                "option_expire_date": "2026-10-16",
+                "strike_price": "605"
+              }
+            ]
+          },
+          {
+            "combo_type": "NORMAL",
+            "order_type": "LIMIT",
+            "time_in_force": "DAY",
+            "order_id": "O1",
+            "client_order_id": "C1",
+            "symbol": "ABC",
+            "side": "BUY",
+            "status": "FILLED",
+            "instrument_type": "EQUITY",
+            "total_quantity": "10",
+            "filled_quantity": "10",
+            "filled_price": "20.00",
+            "filled_time_at": "2026-09-21T14:00:00.000Z",
+            "fees": [
+              {
+                "type": "REGULATORY_FEE",
+                "actual_value": "0.01"
+              }
+            ],
+            "commission": {
+              "actual_value": "0"
+            }
+          },
+          {
+            "combo_type": "NORMAL",
+            "order_type": "LIMIT",
+            "time_in_force": "DAY",
+            "order_id": "O7",
+            "client_order_id": "C7",
+            "symbol": "ABC",
+            "side": "BUY",
+            "status": "FILLED",
+            "instrument_type": "EQUITY",
+            "total_quantity": "10",
+            "filled_quantity": "0",
+            "filled_price": "0"
+          },
+          {
+            "combo_type": "NORMAL",
+            "order_type": "LIMIT",
+            "time_in_force": "DAY",
+            "order_id": "O8",
+            "client_order_id": "C8",
+            "symbol": "AAPL",
+            "side": "BUY",
+            "status": "CANCELLED",
+            "instrument_type": "EQUITY",
+            "total_quantity": "10",
+            "filled_quantity": "0",
+            "filled_price": "0"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "W000EXAMPLE",
+      "name": "Webull W000EXAMPLE",
+      "currency": "USD",
+      "equity": 12500,
+      "positions": [
+        {
+          "symbol": "ABC",
+          "quantity": 10,
+          "marketValue": 215,
+          "assetClass": "equity"
+        },
+        {
+          "symbol": "XYZ 261218C55",
+          "quantity": 2,
+          "marketValue": 250,
+          "assetClass": "option"
+        }
+      ],
+      "trades": [
+        {
+          "symbol": "ABC",
+          "side": "buy",
+          "quantity": 10,
+          "price": 20,
+          "fee": 0.01,
+          "executedAt": "2026-09-21T14:00:00.000Z",
+          "assetClass": "equity"
+        },
+        {
+          "symbol": "ABC",
+          "side": "sell",
+          "quantity": 5,
+          "price": 21,
+          "executedAt": "2026-09-21T17:00:00.000Z",
+          "assetClass": "equity"
+        },
+        {
+          "symbol": "XYZ 261218C55",
+          "side": "buy",
+          "quantity": 2,
+          "price": 1.1,
+          "executedAt": "2026-09-22T15:30:00.000Z",
+          "assetClass": "option",
+          "multiplier": 100,
+          "positionEffect": "open"
+        },
+        {
+          "symbol": "ABC",
+          "side": "sell",
+          "quantity": 3,
+          "price": 22,
+          "executedAt": "2026-09-23T16:00:00.000Z",
+          "assetClass": "equity"
+        }
+      ]
+    }
+  ]
+}
