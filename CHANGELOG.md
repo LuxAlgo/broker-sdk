@@ -13,6 +13,8 @@ All notable changes to `@luxalgo/broker-sdk` are documented here.
 - **Webull trade history** from `/trading/orders/historical-orders/list`, read in 30-day windows: a year back on the first sync, from `historySince` after that. Each settled order with a fill becomes one trade at Webull's average fill price, with its fees. Single-leg options get OCC-style symbols (`TSLA 260925P375`), their contract size and whether they opened or closed. Multi-leg orders and orders still working are skipped, and an order seen twice counts once. A rejected window older than the history Webull keeps ends the walk.
 - `Trade.assetClass`, `Trade.multiplier` and `Trade.positionEffect`, set only when the broker reports them.
 - `historySince` on `connect()` and `FetchContext`: a lower bound for brokers that page through trade history.
+- **Binance USDⓈ-M futures** as a second account: the futures margin balance as equity, open positions, and fills from `/fapi/v1/userTrades` for the last three months. Binance only returns fills per symbol, so the symbols come from the income history and the open positions. Each symbol is read in 7-day windows, from `historySince` on later syncs, and requests pause before Binance's weight limit. Fees in a stablecoin count at face value and fees in BNB at that hour's BNB/USDT close; a fee in any other asset is left out. A key that can't read futures keeps the spot account as before. Spot fills are still not read.
+- `Trade.positionSide` (`"long" | "short"`), set when the broker keeps a long and a short position on one symbol apart, as Binance hedge mode does. Hedge-mode fills also carry `positionEffect`.
 
 ## 0.5.1
 

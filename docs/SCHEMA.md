@@ -37,9 +37,10 @@ One shape for everything, regardless of broker. This document is the human-reada
 | `price` | `number` | Per unit, in the account's `currency`. |
 | `fee?` | `number` | Commission/fee, absolute value, only when reported and non-zero. |
 | `executedAt?` | `string` | ISO 8601, only when the source carried a parseable timestamp. |
-| `assetClass?` | same as `Position.assetClass` | Only when the broker says what was traded (Webull `instrument_type`). |
+| `assetClass?` | same as `Position.assetClass` | Only when the broker says what was traded (Webull `instrument_type`) or the venue implies it (Binance USDⓈ-M fills are futures). |
 | `multiplier?` | `number` | Contract size, only when the broker reports it (Webull `option_contract_multiplier`). |
-| `positionEffect?` | `"open" \| "close"` | Only when the broker reports whether the fill opened or closed a position (Webull `position_intent`). |
+| `positionEffect?` | `"open" \| "close"` | Only when the broker reports whether the fill opened or closed a position (Webull `position_intent`, Binance hedge mode). |
+| `positionSide?` | `"long" \| "short"` | Only when the broker keeps a long and a short position on one symbol apart (Binance hedge mode `positionSide`). Fills without it net into one position. |
 
 ### Bar
 

@@ -47,6 +47,11 @@ export type Trade = {
   multiplier?: number;
   /** Whether the fill opened or closed a position, only when the broker reports it. */
   positionEffect?: "open" | "close";
+  /**
+   * Which of two positions held at once on one symbol the fill belongs to, only
+   * when the broker keeps them apart (Binance hedge mode). Fills without it net.
+   */
+  positionSide?: "long" | "short";
 };
 
 /** One account at a broker, fully normalized. */

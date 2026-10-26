@@ -32,7 +32,7 @@ export {
   type AlpacaBarRow,
 } from "./alpaca-bars.js";
 export { buildBar, effectiveBarLimit, finalizeBars } from "./bars.js";
-export { binance, type BinanceRaw } from "./binance.js";
+export { binance, parseBinanceFuturesTrades, type BinanceRaw } from "./binance.js";
 export { bybit, type BybitRaw } from "./bybit.js";
 export {
   coinbase,

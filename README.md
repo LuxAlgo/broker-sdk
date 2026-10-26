@@ -135,7 +135,7 @@ const positions = positionsFromTrades(trades);
 | Broker | Credentials | Trades history | Bars |
 | --- | --- | :---: | :---: |
 | Alpaca (live + paper) | API key + secret | ✅ | ✅ |
-| Binance | API key + secret (read-only) | ➖ | ➖ |
+| Binance | API key + secret (read-only) | ✅ USDⓈ-M futures | ➖ |
 | Bybit | API key + secret (read-only) | ➖ | ➖ |
 | Charles Schwab | your own OAuth2 app | ✅ | ➖ |
 | Coinbase | your own OAuth2 app (read scope) | ➖ | ➖ |
