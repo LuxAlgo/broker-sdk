@@ -48,9 +48,11 @@ export const matchRoundTrips = (trades: Trade[]): { pnl: number }[] => {
   const roundTrips: { pnl: number }[] = [];
 
   for (const trade of sorted) {
-    // A hedge-mode side is its own position, so its lots never meet the other side's.
+    // A hedge-mode side is its own position, so its lots never meet the other
+    // side's; the short side opens on sells and closes on buys.
     const key = trade.positionSide ? `${trade.symbol}\u0000${trade.positionSide}` : trade.symbol;
-    if (trade.side === "buy") {
+    const short = trade.positionSide === "short";
+    if ((trade.side === "buy") !== short) {
       const lots = openLots.get(key) ?? [];
       lots.push({ quantity: trade.quantity, price: trade.price });
       openLots.set(key, lots);
@@ -62,7 +64,7 @@ export const matchRoundTrips = (trades: Trade[]): { pnl: number }[] => {
       const lot = lots[0];
       if (!lot) break;
       const matched = Math.min(remaining, lot.quantity);
-      roundTrips.push({ pnl: (trade.price - lot.price) * matched });
+      roundTrips.push({ pnl: (short ? lot.price - trade.price : trade.price - lot.price) * matched });
       lot.quantity -= matched;
       remaining -= matched;
       if (lot.quantity <= 1e-9) lots.shift();

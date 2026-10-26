@@ -62,9 +62,19 @@ describe("the trading stats derived from trades", () => {
       trade({ side: "buy", price: 90, positionSide: "short", executedAt: "2026-01-03T00:00:00Z" }),
       trade({ side: "sell", price: 150, positionSide: "long", executedAt: "2026-01-04T00:00:00Z" }),
     ]);
-    // The long closes at 150 against its own 100 entry, not the short's 90 cover.
-    expect(stats.trades?.realizedPnl).toBe(50);
+    // The long closes at 150 against its own 100 entry, and the short sold at
+    // 120 is covered at 90: two wins, never one side matched against the other.
+    expect(stats.trades?.realizedPnl).toBe(80);
+    expect(stats.trades?.wins).toBe(2);
+  });
+
+  it("match a hedge-mode short's covers against its own sells", () => {
+    const short = (side: "buy" | "sell", price: number, day: number) =>
+      trade({ side, price, positionSide: "short", executedAt: `2026-01-0${day}T00:00:00Z` });
+    const stats = statsFor([short("sell", 120, 1), short("buy", 90, 2), short("sell", 100, 3), short("buy", 110, 4)]);
+    expect(stats.trades?.realizedPnl).toBe(20);
     expect(stats.trades?.wins).toBe(1);
+    expect(stats.trades?.losses).toBe(1);
   });
 
   it("aggregate equity by broker across accounts", () => {

@@ -20,16 +20,24 @@ import type { BrokerAdapter, Credentials, FetchContext } from "./types.js";
 
 const BINANCE_API = "https://api.binance.com";
 const BINANCE_FUTURES_API = "https://fapi.binance.com";
-const STABLECOINS = new Set(["USDT", "USDC", "FDUSD"]);
+/** Valued at face value. BFUSD is redeemable 1:1 for USDT. */
+const STABLECOINS = new Set(["USDT", "USDC", "FDUSD", "BFUSD"]);
 
 type BinanceAccount = {
   balances?: { asset: string; free: string; locked: string }[];
 };
 
-type BinanceFuturesAccount = { totalMarginBalance?: string };
+type BinanceFuturesAccount = {
+  /** USDT only in single-asset mode, so equity is summed from `assets` instead. */
+  totalMarginBalance?: string;
+  /** One row per margin asset, in that asset's units. */
+  assets?: { asset?: string; marginBalance?: string }[];
+};
 
 type BinanceFuturesPosition = {
   symbol?: string;
+  /** `BOTH` in one-way mode; `LONG` or `SHORT` in hedge mode. */
+  positionSide?: string;
   positionAmt?: string;
   entryPrice?: string;
   notional?: string;
@@ -57,7 +65,7 @@ export type BinanceRaw = {
     account: BinanceFuturesAccount;
     positions: BinanceFuturesPosition[];
     trades: BinanceFuturesTrade[];
-    /** BNB/USDT hourly closes by the hour's start (epoch ms), for fees paid in BNB. */
+    /** BNB/USDT hourly opens by the hour's start (epoch ms), for fees paid in BNB. */
     bnbUsdtHourly: Record<string, number>;
   };
 };
@@ -67,9 +75,16 @@ const DAY_MS = 24 * HOUR_MS;
 
 const hourOf = (time: number): number => Math.floor(time / HOUR_MS) * HOUR_MS;
 
+/** USD value of an amount of `asset`, when it can be priced. */
+const usdValue = (asset: string, amount: number, usdtPrices: Record<string, number>): number | undefined => {
+  const price = STABLECOINS.has(asset) ? 1 : usdtPrices[asset];
+  return price !== undefined ? amount * price : undefined;
+};
+
 /**
- * A fee in a stablecoin counts at face value and one in BNB at that hour's
- * BNB/USDT close. Any other asset, a zero fee or a rebate is left out.
+ * A fee in a stablecoin counts at face value and one in BNB at the BNB/USDT
+ * open of the hour it was charged in, a price that no longer changes once the
+ * hour starts. Any other asset, a zero fee or a rebate is left out.
  */
 const futuresFee = (trade: BinanceFuturesTrade, bnbUsdtHourly: Record<string, number>): number | undefined => {
   const commission = asFiniteNumber(trade.commission);
@@ -130,15 +145,32 @@ const futuresPositions = (rows: BinanceFuturesPosition[]): Position[] => {
     if (!row.symbol || quantity === undefined || quantity === 0) continue;
     const marketValue = asFiniteNumber(row.notional);
     const averageEntryPrice = asFiniteNumber(row.entryPrice);
+    const positionSide = HEDGE_SIDES[row.positionSide ?? ""];
     positions.push({
       symbol: row.symbol,
       quantity,
       ...(marketValue !== undefined ? { marketValue } : {}),
       ...(averageEntryPrice ? { averageEntryPrice } : {}),
       assetClass: "futures",
+      ...(positionSide ? { positionSide } : {}),
     });
   }
   return positions;
+};
+
+/**
+ * Every margin asset valued in USD. `totalMarginBalance` counts only USDT in
+ * single-asset mode, so it would leave out USDC-margined contracts.
+ */
+const futuresEquity = (account: BinanceFuturesAccount, usdtPrices: Record<string, number>): number => {
+  if (!account.assets) return asFiniteNumber(account.totalMarginBalance) ?? 0;
+  let equity = 0;
+  for (const entry of account.assets) {
+    const balance = asFiniteNumber(entry.marginBalance);
+    if (!entry.asset || !balance) continue;
+    equity += usdValue(entry.asset, balance, usdtPrices) ?? 0;
+  }
+  return equity;
 };
 
 const normalize = (raw: BinanceRaw): Account[] => {
@@ -147,8 +179,7 @@ const normalize = (raw: BinanceRaw): Account[] => {
   for (const entry of raw.account.balances ?? []) {
     const quantity = (asFiniteNumber(entry.free) ?? Number.NaN) + (asFiniteNumber(entry.locked) ?? Number.NaN);
     if (!Number.isFinite(quantity) || quantity <= 0) continue;
-    const price = STABLECOINS.has(entry.asset) ? 1 : raw.usdtPrices[entry.asset];
-    const marketValue = price !== undefined ? quantity * price : undefined;
+    const marketValue = usdValue(entry.asset, quantity, raw.usdtPrices);
     if (marketValue !== undefined) equity += marketValue;
     positions.push({
       symbol: entry.asset,
@@ -173,7 +204,7 @@ const normalize = (raw: BinanceRaw): Account[] => {
       id: "binance-usdm-futures",
       name: "Binance USDⓈ-M futures",
       currency: "USD",
-      equity: asFiniteNumber(raw.futures.account.totalMarginBalance) ?? 0,
+      equity: futuresEquity(raw.futures.account, raw.usdtPrices),
       positions: futuresPositions(raw.futures.positions),
       trades: parseBinanceFuturesTrades(raw.futures.trades, raw.futures.bnbUsdtHourly),
     });
@@ -200,22 +231,42 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const untilNextMinute = () => 60_000 - (Date.now() % 60_000) + 1_000;
 
 /**
- * Binance bans an IP (418) that keeps calling after a 429, so wait out the
- * minute instead of retrying fast, and pause before the weight limit is hit.
+ * Every call here only reads, so a dropped connection or a 5xx is retried
+ * with backoff. Binance bans an IP (418) that keeps calling after a 429, so a
+ * 429 waits out the minute, and calls pause before the weight limit is hit.
  * `url` is rebuilt per attempt so a signed request carries a fresh timestamp.
  */
 const throttledFetch = async (ctx: FetchContext, url: () => string, init?: RequestInit): Promise<Response> => {
   for (let attempt = 0; ; attempt++) {
-    const response = await ctx.fetch(url(), init);
+    let response: Response;
+    try {
+      response = await ctx.fetch(url(), init);
+    } catch (error) {
+      if (attempt >= MAX_RETRIES) throw error;
+      await sleep(1000 * 2 ** attempt);
+      continue;
+    }
     if (response.status === 429 && attempt < MAX_RETRIES) {
       const retryAfter = Number.parseFloat(response.headers.get("retry-after") ?? "");
       await sleep(Number.isFinite(retryAfter) && retryAfter >= 0 ? retryAfter * 1000 : untilNextMinute());
+      continue;
+    }
+    if (response.status >= 500 && attempt < MAX_RETRIES) {
+      await sleep(1000 * 2 ** attempt);
       continue;
     }
     const usedWeight = Number.parseFloat(response.headers.get("x-mbx-used-weight-1m") ?? "");
     if (usedWeight >= WEIGHT_PAUSE_AT) await sleep(untilNextMinute());
     return response;
   }
+};
+
+/** Binance answers 403 when its firewall limits an IP; a rejected key is a 401. */
+const rejectBinance = (name: string, response: Response): never => {
+  if (response.status === 403) {
+    throw new BrokerRequestError("binance", `${name} refused the request (403); its firewall may be limiting this IP`, 403);
+  }
+  return rejectResponse("binance", name, response);
 };
 
 /** Binance's numeric error code from an error body, when it has one. */
@@ -229,24 +280,24 @@ const errorCode = async (response: Response): Promise<number | undefined> => {
 
 /**
  * A key that cannot read futures, or an account without them, keeps the spot
- * account alone, as before futures were read: 401/403 or -2015 for the key,
+ * account alone, as before futures were read: 401 or -2015 for the key,
  * -4109 for an inactive futures account, 451 where futures are not offered.
  */
 const futuresUnavailable = async (response: Response): Promise<boolean> => {
-  if (response.status === 401 || response.status === 403 || response.status === 451) return true;
+  if (response.status === 401 || response.status === 451) return true;
   if (response.status !== 400) return false;
   const code = await errorCode(response);
   return code === -2015 || code === -4109;
 };
 
-/** Hourly BNB/USDT closes for the hours in which a fee was paid in BNB. */
+/** Hourly BNB/USDT opens for the hours in which a fee was paid in BNB. */
 const fetchBnbHours = async (ctx: FetchContext, trades: BinanceFuturesTrade[]): Promise<Record<string, number>> => {
   const hours = new Set<number>();
   for (const trade of trades) {
     if (trade.commissionAsset === "BNB" && typeof trade.time === "number") hours.add(hourOf(trade.time));
   }
   const sorted = [...hours].sort((a, b) => a - b);
-  const closes: Record<string, number> = {};
+  const opens: Record<string, number> = {};
   for (let index = 0; index < sorted.length; ) {
     const start = sorted[index]!;
     // One call returns up to 1,000 consecutive hourly candles.
@@ -255,15 +306,15 @@ const fetchBnbHours = async (ctx: FetchContext, trades: BinanceFuturesTrade[]): 
       ctx,
       () => `${BINANCE_API}/api/v3/klines?symbol=BNBUSDT&interval=1h&startTime=${start}&endTime=${end}&limit=${PAGE_LIMIT}`,
     );
-    if (!response.ok) rejectResponse("binance", "Binance", response);
+    if (!response.ok) rejectBinance("Binance", response);
     for (const kline of (await response.json()) as unknown[][]) {
       const openTime = kline[0];
-      const close = asFiniteNumber(kline[4] as string);
-      if (typeof openTime === "number" && hours.has(openTime) && close !== undefined) closes[String(openTime)] = close;
+      const open = asFiniteNumber(kline[1] as string);
+      if (typeof openTime === "number" && hours.has(openTime) && open !== undefined) opens[String(openTime)] = open;
     }
     while (index < sorted.length && sorted[index]! <= end) index++;
   }
-  return closes;
+  return opens;
 };
 
 const fetchFutures = async (
@@ -280,7 +331,7 @@ const fetchFutures = async (
     if (!response.ok) {
       // A symbol from the income history that Binance no longer lists (-1121) has no readable fills.
       if (response.status === 400 && (await errorCode(response)) === -1121) return [];
-      rejectResponse("binance", "Binance futures", response);
+      rejectBinance("Binance futures", response);
     }
     return (await response.json()) as T[];
   };
@@ -288,7 +339,7 @@ const fetchFutures = async (
   const accountResponse = await call("/fapi/v3/account");
   if (!accountResponse.ok) {
     if (await futuresUnavailable(accountResponse)) return undefined;
-    rejectResponse("binance", "Binance futures", accountResponse);
+    rejectBinance("Binance futures", accountResponse);
   }
   const account = (await accountResponse.json()) as BinanceFuturesAccount;
   const positions = await list<BinanceFuturesPosition>("/fapi/v3/positionRisk");
@@ -297,8 +348,18 @@ const fetchFutures = async (
   const since = ctx.historySince === undefined ? Number.NaN : Date.parse(ctx.historySince);
   const floor = Math.max(now - FUTURES_LOOKBACK_MS, Number.isFinite(since) ? since : 0);
 
-  /** Every row in [from, to]. A full page may be cut short, so its window is halved and fetched again. */
-  const walk = async <T>(path: string, params: Record<string, string>, from: number, to: number): Promise<T[]> => {
+  /**
+   * Every row in [from, to]. A full page may be cut short, so its window is
+   * halved and fetched again; a full page within one millisecond is passed
+   * to `pageOn`, the only way left to read further.
+   */
+  const walk = async <T>(
+    path: string,
+    params: Record<string, string>,
+    from: number,
+    to: number,
+    pageOn?: (full: T[], end: number) => Promise<T[]>,
+  ): Promise<T[]> => {
     const rows: T[] = [];
     const page = async (start: number, end: number): Promise<void> => {
       const batch = await list<T>(path, {
@@ -307,16 +368,34 @@ const fetchFutures = async (
         endTime: String(end),
         limit: String(PAGE_LIMIT),
       });
-      if (batch.length < PAGE_LIMIT || end <= start) {
-        for (const row of batch) rows.push(row);
+      if (batch.length === PAGE_LIMIT && end > start) {
+        const middle = start + Math.floor((end - start) / 2);
+        await page(start, middle);
+        await page(middle + 1, end);
         return;
       }
-      const middle = start + Math.floor((end - start) / 2);
-      await page(start, middle);
-      await page(middle + 1, end);
+      for (const row of batch) rows.push(row);
+      if (batch.length === PAGE_LIMIT && pageOn) for (const row of await pageOn(batch, end)) rows.push(row);
     };
     for (let start = from; start <= to; start += WINDOW_MS + 1) await page(start, Math.min(to, start + WINDOW_MS));
     return rows;
+  };
+
+  /** Fills after a full page, by ID (which cannot be combined with a time window), up to `end`. */
+  const fillsAfter = (symbol: string) => async (full: BinanceFuturesTrade[], end: number) => {
+    const more: BinanceFuturesTrade[] = [];
+    for (let last = full; last.length === PAGE_LIMIT; ) {
+      const fromId = Math.max(...last.map((row) => row.id ?? 0)) + 1;
+      const next = await list<BinanceFuturesTrade>("/fapi/v1/userTrades", {
+        symbol,
+        fromId: String(fromId),
+        limit: String(PAGE_LIMIT),
+      });
+      last = next.filter((row) => typeof row.time === "number" && row.time <= end);
+      for (const row of last) more.push(row);
+      if (last.length < next.length) break;
+    }
+    return more;
   };
 
   const symbols = new Set<string>();
@@ -329,7 +408,7 @@ const fetchFutures = async (
 
   const trades: BinanceFuturesTrade[] = [];
   for (const symbol of [...symbols].sort()) {
-    for (const trade of await walk<BinanceFuturesTrade>("/fapi/v1/userTrades", { symbol }, floor, now)) {
+    for (const trade of await walk("/fapi/v1/userTrades", { symbol }, floor, now, fillsAfter(symbol))) {
       trades.push(trade);
     }
   }
@@ -343,14 +422,14 @@ const fetchRaw = async (credentials: Credentials, ctx: FetchContext) => {
     throw new MissingCredentialsError("binance", "Binance connection is missing its API key or secret");
   }
 
-  const response = await ctx.fetch(`${BINANCE_API}/api/v3/account?${signedQuery(apiSecret)}`, {
+  const response = await throttledFetch(ctx, () => `${BINANCE_API}/api/v3/account?${signedQuery(apiSecret)}`, {
     headers: { "X-MBX-APIKEY": apiKey },
   });
-  if (!response.ok) rejectResponse("binance", "Binance", response);
+  if (!response.ok) rejectBinance("Binance", response);
   const account = (await response.json()) as BinanceAccount;
 
   const usdtPrices: Record<string, number> = {};
-  const pricesResponse = await ctx.fetch(`${BINANCE_API}/api/v3/ticker/price`);
+  const pricesResponse = await throttledFetch(ctx, () => `${BINANCE_API}/api/v3/ticker/price`);
   if (pricesResponse.ok) {
     const rows = (await pricesResponse.json()) as { symbol: string; price: string }[];
     for (const row of rows) {

@@ -8,7 +8,7 @@
   events. The same rule applies to an account seen for the first time inside
   an already-known broker snapshot.
 */
-import type { BrokerSnapshot, Trade } from "../index.js";
+import type { BrokerSnapshot, Position, Trade } from "../index.js";
 import type { SyncEvent } from "./events.js";
 
 /**
@@ -21,8 +21,8 @@ export const tradeKey = (trade: Trade): string =>
 
 /**
  * Diff two snapshots of the same broker into events. Accounts are matched
- * by their broker-side stable `id`, positions by `symbol`, trades by
- * `tradeKey` occurrence counting.
+ * by their broker-side stable `id`, positions by `symbol` and hedge-mode
+ * `positionSide`, trades by `tradeKey` occurrence counting.
  */
 export const diffSnapshots = (previous: BrokerSnapshot | undefined, next: BrokerSnapshot): SyncEvent[] => {
   if (!previous) return [];
@@ -69,15 +69,17 @@ export const diffSnapshots = (previous: BrokerSnapshot | undefined, next: Broker
       });
     }
 
-    // Positions, keyed by symbol.
-    const beforePositions = new Map(before.positions.map((position) => [position.symbol, position]));
+    // Positions, keyed by symbol and, in hedge mode, by side: a long and a
+    // short on one symbol are two positions.
+    const positionKey = (position: Position) => `${position.symbol}\u0000${position.positionSide ?? ""}`;
+    const beforePositions = new Map(before.positions.map((position) => [positionKey(position), position]));
     for (const position of account.positions) {
-      const previousPosition = beforePositions.get(position.symbol);
+      const previousPosition = beforePositions.get(positionKey(position));
       if (!previousPosition) {
         events.push({ type: "position_opened", broker, accountId, at, position });
         continue;
       }
-      beforePositions.delete(position.symbol);
+      beforePositions.delete(positionKey(position));
       if (previousPosition.quantity !== position.quantity) {
         events.push({
           type: "position_changed",
@@ -85,18 +87,20 @@ export const diffSnapshots = (previous: BrokerSnapshot | undefined, next: Broker
           accountId,
           at,
           symbol: position.symbol,
+          ...(position.positionSide ? { positionSide: position.positionSide } : {}),
           quantity: position.quantity,
           previousQuantity: previousPosition.quantity,
         });
       }
     }
-    for (const [symbol, previousPosition] of beforePositions) {
+    for (const previousPosition of beforePositions.values()) {
       events.push({
         type: "position_closed",
         broker,
         accountId,
         at,
-        symbol,
+        symbol: previousPosition.symbol,
+        ...(previousPosition.positionSide ? { positionSide: previousPosition.positionSide } : {}),
         previousQuantity: previousPosition.quantity,
       });
     }

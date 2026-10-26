@@ -192,6 +192,40 @@ describe("diffSnapshots", () => {
     });
   });
 
+  it("treats a hedge-mode long and short on one symbol as two positions", () => {
+    const long = makePosition({ symbol: "ETHUSDT", quantity: 1, positionSide: "long" });
+    const short = makePosition({ symbol: "ETHUSDT", quantity: -0.5, positionSide: "short" });
+    const previous = makeSnapshot({ accounts: [makeAccount({ positions: [long, short] })] });
+
+    expect(diffSnapshots(previous, makeSnapshot({ accounts: [makeAccount({ positions: [long, short] })] }))).toEqual([]);
+
+    const next = makeSnapshot({
+      fetchedAt: "2026-08-28T12:05:00.000Z",
+      accounts: [makeAccount({ positions: [{ ...short, quantity: -1 }] })],
+    });
+    expect(diffSnapshots(previous, next)).toEqual([
+      {
+        type: "position_changed",
+        broker: "alpaca",
+        accountId: "acct-1",
+        at: "2026-08-28T12:05:00.000Z",
+        symbol: "ETHUSDT",
+        positionSide: "short",
+        quantity: -1,
+        previousQuantity: -0.5,
+      },
+      {
+        type: "position_closed",
+        broker: "alpaca",
+        accountId: "acct-1",
+        at: "2026-08-28T12:05:00.000Z",
+        symbol: "ETHUSDT",
+        positionSide: "long",
+        previousQuantity: 1,
+      },
+    ]);
+  });
+
   it("emits nothing for a position whose quantity is unchanged (even if value moved)", () => {
     const previous = makeSnapshot({
       accounts: [makeAccount({ positions: [makePosition({ quantity: 10, marketValue: 2_000 })] })],

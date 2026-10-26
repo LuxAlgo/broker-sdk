@@ -64,9 +64,32 @@ describe("Binance USDⓈ-M futures", () => {
     expect(raw.futures).toBeUndefined();
   });
 
-  it("a futures outage fails the sync instead of dropping its history", async () => {
-    const gateway = fakeBinance({ "/fapi/v3/account": () => json({ code: -1001, msg: "Internal error" }, 500) });
-    await expect(binance.fetchRaw(credentials, { fetch: gateway.fetch })).rejects.toThrow("500");
+  it("an unexpected futures error fails the sync instead of dropping its history", async () => {
+    const gateway = fakeBinance({ "/fapi/v3/account": () => json({ code: -1022, msg: "Invalid signature" }, 400) });
+    await expect(binance.fetchRaw(credentials, { fetch: gateway.fetch })).rejects.toThrow("400");
+  });
+
+  it("a firewall 403 fails the sync rather than reading as a key without futures", async () => {
+    const gateway = fakeBinance({ "/fapi/v3/account": () => new Response("WAF Limit", { status: 403 }) });
+    await expect(binance.fetchRaw(credentials, { fetch: gateway.fetch })).rejects.toThrow("firewall");
+  });
+
+  it("a server error or dropped connection is retried rather than failing the sync", async () => {
+    let dropped = false;
+    const gateway = fakeBinance({
+      "/fapi/v3/account": (_, call) =>
+        call === 0 ? json({ code: -1008, msg: "Request throttled" }, 503) : json({ totalMarginBalance: "5" }),
+    });
+    const flaky = (async (url: string, init?: RequestInit) => {
+      if (!dropped && new URL(url).pathname === "/fapi/v3/positionRisk") {
+        dropped = true;
+        throw new TypeError("fetch failed");
+      }
+      return gateway.fetch(url, init);
+    }) as typeof globalThis.fetch;
+    const { raw } = await binance.fetchRaw(credentials, { fetch: flaky, historySince: new Date().toISOString() });
+    expect(gateway.to("/fapi/v3/account")).toHaveLength(2);
+    expect(raw.futures!.account.totalMarginBalance).toBe("5");
   });
 
   it("finds traded symbols in the income history and open positions, then reads each in 7-day windows", async () => {
@@ -156,7 +179,7 @@ describe("Binance USDⓈ-M futures", () => {
     expect(raw.futures!.trades).toHaveLength(4);
   });
 
-  it("prices fees paid in BNB from that hour's BNB/USDT candle", async () => {
+  it("prices fees paid in BNB at that hour's BNB/USDT open", async () => {
     const time = Date.now() - 2 * DAY_MS;
     const hour = Math.floor(time / HOUR_MS) * HOUR_MS;
     const gateway = fakeBinance({
@@ -177,8 +200,9 @@ describe("Binance USDⓈ-M futures", () => {
     expect(klines).toHaveLength(1);
     expect(klines[0]!.query.get("symbol")).toBe("BNBUSDT");
     expect(klines[0]!.query.get("startTime")).toBe(String(hour));
-    expect(raw.futures!.bnbUsdtHourly).toEqual({ [String(hour)]: 600.5 });
-    expect(binance.normalize(raw)[1]!.trades[0]!.fee).toBeCloseTo(0.06005, 10);
+    // The hour's open, which no longer moves once the hour has started.
+    expect(raw.futures!.bnbUsdtHourly).toEqual({ [String(hour)]: 590 });
+    expect(binance.normalize(raw)[1]!.trades[0]!.fee).toBeCloseTo(0.059, 10);
   });
 
   it("asks for no BNB prices when no fee was paid in BNB", async () => {
@@ -219,5 +243,26 @@ describe("Binance USDⓈ-M futures", () => {
       historySince: new Date(Date.now() - 2 * DAY_MS).toISOString(),
     });
     expect(raw.futures!.trades.map((trade) => trade.symbol)).toEqual(["BTCUSDT"]);
+  });
+
+  it("more than a page of fills in one millisecond is read on by fill ID", async () => {
+    const time = Date.now() - DAY_MS;
+    const burst = Array.from({ length: 1500 }, (_, index) => fill(index + 1, "BTCUSDT", time));
+    const gateway = fakeBinance({
+      "/fapi/v1/income": () => json([{ symbol: "BTCUSDT" }]),
+      "/fapi/v1/userTrades": (query) => {
+        const fromId = query.get("fromId");
+        if (fromId) return json(burst.filter((row) => row.id >= Number(fromId)).slice(0, 1000));
+        const start = Number(query.get("startTime"));
+        const end = Number(query.get("endTime"));
+        return json(burst.filter((row) => row.time >= start && row.time <= end).slice(0, 1000));
+      },
+    });
+    const { raw } = await binance.fetchRaw(credentials, {
+      fetch: gateway.fetch,
+      historySince: new Date(Date.now() - 2 * DAY_MS).toISOString(),
+    });
+    expect(raw.futures!.trades).toHaveLength(1500);
+    expect(binance.normalize(raw)[1]!.trades).toHaveLength(1500);
   });
 });

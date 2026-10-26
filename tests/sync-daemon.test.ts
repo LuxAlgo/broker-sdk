@@ -101,6 +101,31 @@ describe("createSyncDaemon", () => {
     expect(sink.batches).toHaveLength(2);
   });
 
+  it("after the first sweep, asks each broker only for history since the saved snapshot, less 30 days", async () => {
+    const dir = await makeTmpDir();
+    const requests: ({ historySince?: string } | undefined)[] = [];
+    const connection: DaemonConnection = {
+      broker: "binance",
+      label: "binance",
+      fetchSnapshot: async (options) => {
+        requests.push(options);
+        return makeSnapshot({ broker: "binance", fetchedAt: "2026-08-28T12:00:00.000Z" });
+      },
+    };
+    const daemon = createSyncDaemon({
+      connections: [connection],
+      sinks: [],
+      statePath: path.join(dir, "state.json"),
+      intervalSeconds: 60,
+      now: fixedNow(),
+    });
+
+    await daemon.sweep();
+    await daemon.sweep();
+
+    expect(requests).toEqual([undefined, { historySince: "2026-07-29T12:00:00.000Z" }]);
+  });
+
   it("turns a failing connection into broker_error plus a sync_completed failure, without hiding the rest", async () => {
     const dir = await makeTmpDir();
     const statePath = path.join(dir, "state.json");

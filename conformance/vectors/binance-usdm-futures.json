@@ -1,16 +1,50 @@
 {
   "broker": "binance",
-  "description": "USDⓈ-M futures next to spot: margin balance as equity, open positions only, fills as futures trades. Hedge-mode fills carry their position side and whether they opened or closed it; one-way fills carry neither. Stablecoin fees count at face value and BNB fees at that hour's BNB/USDT close; a fee in another asset, a zero fee or a missing BNB price is left out. A fill returned twice is kept once, and rows with no quantity or no side are skipped.",
+  "description": "USDⓈ-M futures next to spot. Equity sums every margin asset in USD: totalMarginBalance counts only USDT in single-asset mode, so USDC and BNB margin would be lost. Only open positions are kept, and hedge-mode positions keep their side. Fills become futures trades. Hedge-mode fills carry their position side and whether they opened or closed it; one-way fills carry neither. Stablecoin fees count at face value and BNB fees at that hour's BNB/USDT price; a fee in another asset, a zero fee or a missing BNB price is left out. A fill returned twice is kept once, and rows with no quantity or no side are skipped.",
   "raw": {
     "account": {
-      "balances": [{ "asset": "USDT", "free": "10", "locked": "0" }]
+      "balances": [
+        {
+          "asset": "USDT",
+          "free": "10",
+          "locked": "0"
+        }
+      ]
     },
-    "usdtPrices": {},
+    "usdtPrices": {
+      "BNB": 600
+    },
     "futures": {
       "account": {
         "totalWalletBalance": "1040.00",
         "totalUnrealizedProfit": "11.25",
-        "totalMarginBalance": "1051.25"
+        "totalMarginBalance": "1040.00",
+        "assets": [
+          {
+            "asset": "USDT",
+            "walletBalance": "1030.00",
+            "unrealizedProfit": "10.00",
+            "marginBalance": "1040.00"
+          },
+          {
+            "asset": "USDC",
+            "walletBalance": "10.00",
+            "unrealizedProfit": "1.25",
+            "marginBalance": "11.25"
+          },
+          {
+            "asset": "BNB",
+            "walletBalance": "0.01",
+            "unrealizedProfit": "0",
+            "marginBalance": "0.01"
+          },
+          {
+            "asset": "FDUSD",
+            "walletBalance": "0",
+            "unrealizedProfit": "0",
+            "marginBalance": "0"
+          }
+        ]
       },
       "positions": [
         {
@@ -195,17 +229,37 @@
       "name": "Binance spot",
       "currency": "USD",
       "equity": 10,
-      "positions": [{ "symbol": "USDT", "quantity": 10, "marketValue": 10, "assetClass": "crypto" }],
+      "positions": [
+        {
+          "symbol": "USDT",
+          "quantity": 10,
+          "marketValue": 10,
+          "assetClass": "crypto"
+        }
+      ],
       "trades": []
     },
     {
       "id": "binance-usdm-futures",
       "name": "Binance USDⓈ-M futures",
       "currency": "USD",
-      "equity": 1051.25,
+      "equity": 1057.25,
       "positions": [
-        { "symbol": "BTCUSDT", "quantity": 0.01, "marketValue": 605, "averageEntryPrice": 60000, "assetClass": "futures" },
-        { "symbol": "ETHUSDT", "quantity": -0.5, "marketValue": -1490, "averageEntryPrice": 3000, "assetClass": "futures" }
+        {
+          "symbol": "BTCUSDT",
+          "quantity": 0.01,
+          "marketValue": 605,
+          "averageEntryPrice": 60000,
+          "assetClass": "futures"
+        },
+        {
+          "symbol": "ETHUSDT",
+          "quantity": -0.5,
+          "marketValue": -1490,
+          "averageEntryPrice": 3000,
+          "assetClass": "futures",
+          "positionSide": "short"
+        }
       ],
       "trades": [
         {
