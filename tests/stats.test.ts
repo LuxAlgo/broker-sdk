@@ -55,6 +55,18 @@ describe("the trading stats derived from trades", () => {
     expect(stats.trades?.losses).toBe(1);
   });
 
+  it("keep hedge-mode sides apart — covering a short never closes the long", () => {
+    const stats = statsFor([
+      trade({ side: "buy", price: 100, positionSide: "long", executedAt: "2026-01-01T00:00:00Z" }),
+      trade({ side: "sell", price: 120, positionSide: "short", executedAt: "2026-01-02T00:00:00Z" }),
+      trade({ side: "buy", price: 90, positionSide: "short", executedAt: "2026-01-03T00:00:00Z" }),
+      trade({ side: "sell", price: 150, positionSide: "long", executedAt: "2026-01-04T00:00:00Z" }),
+    ]);
+    // The long closes at 150 against its own 100 entry, not the short's 90 cover.
+    expect(stats.trades?.realizedPnl).toBe(50);
+    expect(stats.trades?.wins).toBe(1);
+  });
+
   it("aggregate equity by broker across accounts", () => {
     const stats = computeStats([
       { broker: "kraken", equity: 100, positions: [], trades: [] },

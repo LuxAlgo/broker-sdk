@@ -14,7 +14,7 @@ All notable changes to `@luxalgo/broker-sdk` are documented here.
 - `Trade.assetClass`, `Trade.multiplier` and `Trade.positionEffect`, set only when the broker reports them.
 - `historySince` on `connect()` and `FetchContext`: a lower bound for brokers that page through trade history.
 - **Binance USDⓈ-M futures** as a second account: the futures margin balance as equity, open positions, and fills from `/fapi/v1/userTrades` for the last three months. Binance only returns fills per symbol, so the symbols come from the income history and the open positions. Each symbol is read in 7-day windows, from `historySince` on later syncs, and requests pause before Binance's weight limit. Fees in a stablecoin count at face value and fees in BNB at that hour's BNB/USDT close; a fee in any other asset is left out. A key that can't read futures keeps the spot account as before. Spot fills are still not read.
-- `Trade.positionSide` (`"long" | "short"`), set when the broker keeps a long and a short position on one symbol apart, as Binance hedge mode does. Hedge-mode fills also carry `positionEffect`.
+- `Trade.positionSide` (`"long" | "short"`), set when the broker keeps a long and a short position on one symbol apart, as Binance hedge mode does. Hedge-mode fills also carry `positionEffect`, and `computeStats` matches each side's lots on its own.
 
 ## 0.5.1
 
