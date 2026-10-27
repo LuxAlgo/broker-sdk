@@ -41,6 +41,12 @@ export type Trade = {
   fee?: number;
   /** ISO 8601 timestamp, when the source carried one. */
   executedAt?: string;
+  /** What kind of instrument was traded, only when the broker says so. Never inferred from the symbol. */
+  assetClass?: AssetClass;
+  /** Contract size, such as 100 for a US equity option, only when the broker reports it. */
+  multiplier?: number;
+  /** Whether the fill opened or closed a position, only when the broker reports it. */
+  positionEffect?: "open" | "close";
 };
 
 /** One account at a broker, fully normalized. */
