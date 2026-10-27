@@ -27,6 +27,11 @@ export type Position = {
   /** Average entry price per unit in the account's `currency`, when reported. */
   averageEntryPrice?: number;
   assetClass?: AssetClass;
+  /**
+   * Which of two positions held at once on one symbol this is, only when the
+   * broker keeps them apart (Binance hedge mode). Absent when they net.
+   */
+  positionSide?: "long" | "short";
 };
 
 /** One executed trade (a fill), always from the account holder's side. */
@@ -47,6 +52,11 @@ export type Trade = {
   multiplier?: number;
   /** Whether the fill opened or closed a position, only when the broker reports it. */
   positionEffect?: "open" | "close";
+  /**
+   * Which of two positions held at once on one symbol the fill belongs to, only
+   * when the broker keeps them apart (Binance hedge mode). Fills without it net.
+   */
+  positionSide?: "long" | "short";
 };
 
 /** One account at a broker, fully normalized. */

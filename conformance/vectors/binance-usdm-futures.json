@@ -1,0 +1,325 @@
+{
+  "broker": "binance",
+  "description": "USDⓈ-M futures next to spot. Equity sums every margin asset in USD: totalMarginBalance counts only USDT in single-asset mode, so USDC and BNB margin would be lost. Only open positions are kept, and hedge-mode positions keep their side. Fills become futures trades. Hedge-mode fills carry their position side and whether they opened or closed it; one-way fills carry neither. Stablecoin fees count at face value and BNB fees at that hour's BNB/USDT price; a fee in another asset, a zero fee or a missing BNB price is left out. A fill returned twice is kept once, and rows with no quantity or no side are skipped.",
+  "raw": {
+    "account": {
+      "balances": [
+        {
+          "asset": "USDT",
+          "free": "10",
+          "locked": "0"
+        }
+      ]
+    },
+    "usdtPrices": {
+      "BNB": 600
+    },
+    "futures": {
+      "account": {
+        "totalWalletBalance": "1040.00",
+        "totalUnrealizedProfit": "11.25",
+        "totalMarginBalance": "1040.00",
+        "assets": [
+          {
+            "asset": "USDT",
+            "walletBalance": "1030.00",
+            "unrealizedProfit": "10.00",
+            "marginBalance": "1040.00"
+          },
+          {
+            "asset": "USDC",
+            "walletBalance": "10.00",
+            "unrealizedProfit": "1.25",
+            "marginBalance": "11.25"
+          },
+          {
+            "asset": "BNB",
+            "walletBalance": "0.01",
+            "unrealizedProfit": "0",
+            "marginBalance": "0.01"
+          },
+          {
+            "asset": "FDUSD",
+            "walletBalance": "0",
+            "unrealizedProfit": "0",
+            "marginBalance": "0"
+          }
+        ]
+      },
+      "positions": [
+        {
+          "symbol": "BTCUSDT",
+          "positionSide": "BOTH",
+          "positionAmt": "0.010",
+          "entryPrice": "60000.0",
+          "markPrice": "60500.0",
+          "notional": "605.00",
+          "marginAsset": "USDT"
+        },
+        {
+          "symbol": "ETHUSDT",
+          "positionSide": "SHORT",
+          "positionAmt": "-0.500",
+          "entryPrice": "3000.00",
+          "markPrice": "2980.00",
+          "notional": "-1490.00",
+          "marginAsset": "USDT"
+        },
+        {
+          "symbol": "SOLUSDT",
+          "positionSide": "BOTH",
+          "positionAmt": "0.000",
+          "entryPrice": "0.0",
+          "notional": "0",
+          "marginAsset": "USDT"
+        }
+      ],
+      "trades": [
+        {
+          "id": 101,
+          "orderId": 9001,
+          "symbol": "BTCUSDT",
+          "side": "BUY",
+          "positionSide": "BOTH",
+          "price": "60000.0",
+          "qty": "0.010",
+          "quoteQty": "600.00",
+          "commission": "0.24000000",
+          "commissionAsset": "USDT",
+          "marginAsset": "USDT",
+          "realizedPnl": "0",
+          "buyer": true,
+          "maker": false,
+          "time": 1790000000000
+        },
+        {
+          "id": 101,
+          "orderId": 9001,
+          "symbol": "BTCUSDT",
+          "side": "BUY",
+          "positionSide": "BOTH",
+          "price": "60000.0",
+          "qty": "0.010",
+          "quoteQty": "600.00",
+          "commission": "0.24000000",
+          "commissionAsset": "USDT",
+          "marginAsset": "USDT",
+          "realizedPnl": "0",
+          "buyer": true,
+          "maker": false,
+          "time": 1790000000000
+        },
+        {
+          "id": 202,
+          "orderId": 9101,
+          "symbol": "ETHUSDT",
+          "side": "SELL",
+          "positionSide": "SHORT",
+          "price": "3000.00",
+          "qty": "0.500",
+          "quoteQty": "1500.00",
+          "commission": "0.00050000",
+          "commissionAsset": "BNB",
+          "marginAsset": "USDT",
+          "realizedPnl": "0",
+          "buyer": false,
+          "maker": true,
+          "time": 1790003600000
+        },
+        {
+          "id": 203,
+          "orderId": 9102,
+          "symbol": "ETHUSDT",
+          "side": "BUY",
+          "positionSide": "LONG",
+          "price": "3010.00",
+          "qty": "0.200",
+          "quoteQty": "602.00",
+          "commission": "0.12040000",
+          "commissionAsset": "USDC",
+          "marginAsset": "USDT",
+          "realizedPnl": "0",
+          "buyer": true,
+          "maker": false,
+          "time": 1790003700000
+        },
+        {
+          "id": 204,
+          "orderId": 9103,
+          "symbol": "ETHUSDT",
+          "side": "SELL",
+          "positionSide": "LONG",
+          "price": "3020.00",
+          "qty": "0.200",
+          "quoteQty": "604.00",
+          "commission": "0.00002000",
+          "commissionAsset": "BTC",
+          "marginAsset": "USDT",
+          "realizedPnl": "2.00000000",
+          "buyer": false,
+          "maker": false,
+          "time": 1790003800000
+        },
+        {
+          "id": 102,
+          "orderId": 9002,
+          "symbol": "BTCUSDT",
+          "side": "SELL",
+          "positionSide": "BOTH",
+          "price": "60500.0",
+          "qty": "0.004",
+          "quoteQty": "242.00",
+          "commission": "0.00030000",
+          "commissionAsset": "BNB",
+          "marginAsset": "USDT",
+          "realizedPnl": "2.00000000",
+          "buyer": false,
+          "maker": false,
+          "time": 1790007300000
+        },
+        {
+          "id": 103,
+          "orderId": 9003,
+          "symbol": "BTCUSDT",
+          "side": "SELL",
+          "positionSide": "BOTH",
+          "price": "60600.0",
+          "qty": "0.006",
+          "quoteQty": "363.60",
+          "commission": "0",
+          "commissionAsset": "USDT",
+          "marginAsset": "USDT",
+          "realizedPnl": "3.60000000",
+          "buyer": false,
+          "maker": true,
+          "time": 1790010000000
+        },
+        {
+          "id": 104,
+          "orderId": 9004,
+          "symbol": "BTCUSDT",
+          "side": "BUY",
+          "positionSide": "BOTH",
+          "price": "60000.0",
+          "qty": "0",
+          "commission": "0",
+          "commissionAsset": "USDT",
+          "time": 1790010100000
+        },
+        {
+          "id": 105,
+          "orderId": 9005,
+          "symbol": "BTCUSDT",
+          "positionSide": "BOTH",
+          "price": "60000.0",
+          "qty": "0.001",
+          "commission": "0.02400000",
+          "commissionAsset": "USDT",
+          "time": 1790010200000
+        }
+      ],
+      "bnbUsdtHourly": {
+        "1790002800000": 600.5
+      }
+    }
+  },
+  "expected": [
+    {
+      "id": "binance-spot",
+      "name": "Binance spot",
+      "currency": "USD",
+      "equity": 10,
+      "positions": [
+        {
+          "symbol": "USDT",
+          "quantity": 10,
+          "marketValue": 10,
+          "assetClass": "crypto"
+        }
+      ],
+      "trades": []
+    },
+    {
+      "id": "binance-usdm-futures",
+      "name": "Binance USDⓈ-M futures",
+      "currency": "USD",
+      "equity": 1057.25,
+      "positions": [
+        {
+          "symbol": "BTCUSDT",
+          "quantity": 0.01,
+          "marketValue": 605,
+          "averageEntryPrice": 60000,
+          "assetClass": "futures"
+        },
+        {
+          "symbol": "ETHUSDT",
+          "quantity": -0.5,
+          "marketValue": -1490,
+          "averageEntryPrice": 3000,
+          "assetClass": "futures",
+          "positionSide": "short"
+        }
+      ],
+      "trades": [
+        {
+          "symbol": "BTCUSDT",
+          "side": "buy",
+          "quantity": 0.01,
+          "price": 60000,
+          "fee": 0.24,
+          "executedAt": "2026-09-21T14:13:20.000Z",
+          "assetClass": "futures"
+        },
+        {
+          "symbol": "ETHUSDT",
+          "side": "sell",
+          "quantity": 0.5,
+          "price": 3000,
+          "fee": 0.30025,
+          "executedAt": "2026-09-21T15:13:20.000Z",
+          "assetClass": "futures",
+          "positionSide": "short",
+          "positionEffect": "open"
+        },
+        {
+          "symbol": "ETHUSDT",
+          "side": "buy",
+          "quantity": 0.2,
+          "price": 3010,
+          "fee": 0.1204,
+          "executedAt": "2026-09-21T15:15:00.000Z",
+          "assetClass": "futures",
+          "positionSide": "long",
+          "positionEffect": "open"
+        },
+        {
+          "symbol": "ETHUSDT",
+          "side": "sell",
+          "quantity": 0.2,
+          "price": 3020,
+          "executedAt": "2026-09-21T15:16:40.000Z",
+          "assetClass": "futures",
+          "positionSide": "long",
+          "positionEffect": "close"
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "sell",
+          "quantity": 0.004,
+          "price": 60500,
+          "executedAt": "2026-09-21T16:15:00.000Z",
+          "assetClass": "futures"
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "sell",
+          "quantity": 0.006,
+          "price": 60600,
+          "executedAt": "2026-09-21T17:00:00.000Z",
+          "assetClass": "futures"
+        }
+      ]
+    }
+  ]
+}

@@ -70,8 +70,11 @@ export type BrokerConnection = {
   readonly label: string;
   /** Current credentials — reflects rotation after each fetch. */
   readonly credentials: Credentials;
-  /** Fetch a fresh normalized snapshot straight from the broker. */
-  fetchSnapshot: () => Promise<BrokerSnapshot>;
+  /**
+   * Fetch a fresh normalized snapshot straight from the broker. `historySince`
+   * overrides the connection's lower bound for trade history on this fetch.
+   */
+  fetchSnapshot: (options?: { historySince?: string }) => Promise<BrokerSnapshot>;
   /**
    * Historical OHLCV bars from the broker's own market-data endpoints, with
    * the same read-only credentials. Always present on the object; rejects
@@ -107,8 +110,11 @@ const createConnection = (adapter: AnyBrokerAdapter, options: ConnectOptions): B
     ? { statementTimeZone: ibkrTimeZone(options.statementTimeZone) }
     : undefined;
 
-  const fetchSnapshot = async (): Promise<BrokerSnapshot> => {
-    const result = await adapter.fetchRaw(credentials, ctx);
+  const fetchSnapshot = async (fetchOptions: { historySince?: string } = {}): Promise<BrokerSnapshot> => {
+    const result = await adapter.fetchRaw(
+      credentials,
+      fetchOptions.historySince !== undefined ? { ...ctx, historySince: fetchOptions.historySince } : ctx,
+    );
     if (result.rotatedCredentials) {
       credentials = { ...credentials, ...result.rotatedCredentials };
       await options.onCredentialsRotated?.(credentials);

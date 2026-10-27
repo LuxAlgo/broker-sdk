@@ -26,6 +26,7 @@ One shape for everything, regardless of broker. This document is the human-reada
 | `marketValue?` | `number` | In the account's `currency`, only when the broker can price it. A missing value is more honest than a guessed one. |
 | `averageEntryPrice?` | `number` | Per unit in the account's `currency`, only when the broker reports it (or a real cost basis it derives from, e.g. Tradier's `cost_basis ÷ quantity`). |
 | `assetClass?` | `"equity" \| "option" \| "futures" \| "forex" \| "crypto" \| "cash" \| "other"` | Only when the broker states it (Alpaca, IBKR, Public) or the venue implies it (a Topstep position is always a future; a Kraken USD balance is cash). Never guessed — Webull and Questrade omit it. |
+| `positionSide?` | `"long" \| "short"` | Only when the broker keeps a long and a short position on one symbol apart (Binance hedge mode); each side is its own position. |
 
 ### Trade
 
@@ -37,9 +38,10 @@ One shape for everything, regardless of broker. This document is the human-reada
 | `price` | `number` | Per unit, in the account's `currency`. |
 | `fee?` | `number` | Commission/fee, absolute value, only when reported and non-zero. |
 | `executedAt?` | `string` | ISO 8601, only when the source carried a parseable timestamp. |
-| `assetClass?` | same as `Position.assetClass` | Only when the broker says what was traded (Webull `instrument_type`). |
+| `assetClass?` | same as `Position.assetClass` | Only when the broker says what was traded (Webull `instrument_type`) or the venue implies it (Binance USDⓈ-M fills are futures). |
 | `multiplier?` | `number` | Contract size, only when the broker reports it (Webull `option_contract_multiplier`). |
-| `positionEffect?` | `"open" \| "close"` | Only when the broker reports whether the fill opened or closed a position (Webull `position_intent`). |
+| `positionEffect?` | `"open" \| "close"` | Only when the broker reports whether the fill opened or closed a position (Webull `position_intent`, Binance hedge mode). |
+| `positionSide?` | `"long" \| "short"` | Only when the broker keeps a long and a short position on one symbol apart (Binance hedge mode `positionSide`). Fills without it net into one position. |
 
 ### Bar
 

@@ -41,6 +41,8 @@ export type PositionOpenedEvent = AccountEventBase & {
 export type PositionClosedEvent = AccountEventBase & {
   type: "position_closed";
   symbol: string;
+  /** Set when the broker keeps a long and a short position on the symbol apart. */
+  positionSide?: "long" | "short";
   previousQuantity: number;
 };
 
@@ -48,6 +50,8 @@ export type PositionClosedEvent = AccountEventBase & {
 export type PositionChangedEvent = AccountEventBase & {
   type: "position_changed";
   symbol: string;
+  /** Set when the broker keeps a long and a short position on the symbol apart. */
+  positionSide?: "long" | "short";
   quantity: number;
   previousQuantity: number;
 };

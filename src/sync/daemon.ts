@@ -23,8 +23,16 @@ import { loadState, saveState, type SyncState } from "./state.js";
 export type DaemonConnection = {
   broker: string;
   label: string;
-  fetchSnapshot: () => Promise<BrokerSnapshot>;
+  fetchSnapshot: (options?: { historySince?: string }) => Promise<BrokerSnapshot>;
 };
+
+/**
+ * After the first sweep, brokers that page through trade history (Webull,
+ * Binance futures) are asked only for fills since the saved snapshot, less
+ * this overlap: an order placed earlier can fill since, and refetched fills
+ * simply match the saved snapshot.
+ */
+const HISTORY_OVERLAP_MS = 30 * 86_400_000;
 
 export type SweepResult = {
   events: SyncEvent[];
@@ -65,7 +73,16 @@ export const createSyncDaemon = (options: SyncDaemonOptions): SyncDaemon => {
 
   const runSweep = async (): Promise<SweepResult> => {
     const state = await getState();
-    const settled = await Promise.allSettled(options.connections.map((connection) => connection.fetchSnapshot()));
+    const settled = await Promise.allSettled(
+      options.connections.map((connection) => {
+        const previous = state.snapshots[connection.broker];
+        return previous
+          ? connection.fetchSnapshot({
+              historySince: new Date(Date.parse(previous.fetchedAt) - HISTORY_OVERLAP_MS).toISOString(),
+            })
+          : connection.fetchSnapshot();
+      }),
+    );
 
     const events: SyncEvent[] = [];
     const brokers: string[] = [];
