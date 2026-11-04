@@ -136,6 +136,7 @@ const positions = positionsFromTrades(trades);
 | --- | --- | :---: | :---: |
 | Alpaca (live + paper) | API key + secret | ✅ | ✅ |
 | Binance | API key + secret (read-only) | ✅ USDⓈ-M futures | ➖ |
+| Bitunix | API key + secret (read-only, one main account) | ✅ USDT futures, including Hedge | ➖ |
 | Bybit | API key + secret (read-only) | ➖ | ➖ |
 | Charles Schwab | your own OAuth2 app | ✅ | ➖ |
 | Coinbase | your own OAuth2 app (read scope) | ➖ | ➖ |
@@ -237,7 +238,7 @@ Node ≥ 18.17 (built-in `fetch`; `node:crypto` for request signing). Zero runti
 
 ## Contributing
 
-Copy-paste starting points live in [docs/recipes.md](docs/recipes.md); the bring-your-own-app OAuth guide (Charles Schwab, TradeStation, E\*TRADE, Coinbase) in [docs/byo-oauth.md](docs/byo-oauth.md). Adapter #23 is yours to add, and [CONTRIBUTING.md](CONTRIBUTING.md) walks you through it. The short version: sanctioned user-key APIs only, split fetch/normalize, ship a conformance vector, pass the gate.
+Copy-paste starting points live in [docs/recipes.md](docs/recipes.md); the bring-your-own-app OAuth guide (Charles Schwab, TradeStation, E\*TRADE, Coinbase) in [docs/byo-oauth.md](docs/byo-oauth.md). Adapter #24 is yours to add, and [CONTRIBUTING.md](CONTRIBUTING.md) walks you through it. The short version: sanctioned user-key APIs only, split fetch/normalize, ship a conformance vector, pass the gate.
 
 ## Disclaimer
 

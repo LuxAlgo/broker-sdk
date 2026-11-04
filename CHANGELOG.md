@@ -11,6 +11,7 @@ All notable changes to `@luxalgo/broker-sdk` are documented here.
 
 ### Added
 
+- **Bitunix USDT futures**, with a read-only API key for one main account: USDT equity, open positions with their native `positionId` (and `positionSide` in Hedge mode), and fills from the trade history. Hedge fills are linked to their position by reading fills per position ID, and carry `positionSide`, `positionEffect` and `positionId`. One-way fills are not labeled, since a non-reduce-only fill can reverse a position. Funding is not part of trade P&L. 23 brokers total.
 - `Position.positionId` and `Trade.positionId`: the broker's native position ID, opaque and local to the account, set only when the broker reports it. An adapter that starts reporting it changes the diff keys once; see [SCHEMA.md](docs/SCHEMA.md#trade).
 
 ## 0.6.0
