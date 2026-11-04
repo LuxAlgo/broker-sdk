@@ -45,21 +45,25 @@ export type StatsAccount = Pick<Account, "equity" | "positions" | "trades"> & {
 export const matchRoundTrips = (trades: Trade[]): { pnl: number }[] => {
   const sorted = [...trades].sort((a, b) => (a.executedAt ?? "").localeCompare(b.executedAt ?? ""));
   const openLots = new Map<string, { quantity: number; price: number }[]>();
+  const nativeLots = new Map<string, { quantity: number; price: number }[]>();
   const roundTrips: { pnl: number }[] = [];
 
   for (const trade of sorted) {
     // A hedge-mode side is its own position, so its lots never meet the other
     // side's; the short side opens on sells and closes on buys.
-    const key = trade.positionSide ? `${trade.symbol}\u0000${trade.positionSide}` : trade.symbol;
+    const buckets = trade.positionId === undefined ? openLots : nativeLots;
+    const key = trade.positionId === undefined
+      ? (trade.positionSide ? `${trade.symbol}\u0000${trade.positionSide}` : trade.symbol)
+      : JSON.stringify([trade.symbol, trade.positionSide, trade.positionId]);
     const short = trade.positionSide === "short";
     if ((trade.side === "buy") !== short) {
-      const lots = openLots.get(key) ?? [];
+      const lots = buckets.get(key) ?? [];
       lots.push({ quantity: trade.quantity, price: trade.price });
-      openLots.set(key, lots);
+      buckets.set(key, lots);
       continue;
     }
     let remaining = trade.quantity;
-    const lots = openLots.get(key) ?? [];
+    const lots = buckets.get(key) ?? [];
     while (remaining > 1e-9 && lots.length > 0) {
       const lot = lots[0];
       if (!lot) break;
@@ -148,7 +152,11 @@ export const computeStats = (accounts: StatsAccount[]): PortfolioStats => {
     accountCount: accounts.length,
     equityByBroker,
     topPositions,
-    trades: computeTradeStats(accounts.flatMap((account) => account.trades)),
+    trades: computeTradeStats(accounts.flatMap((account, accountIndex) =>
+      account.trades.map((trade) => trade.positionId === undefined
+        ? trade
+        : { ...trade, positionId: JSON.stringify([accountIndex, trade.positionId]) }),
+    )),
   };
 };
 
