@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { alpacaHostForKey } from "../src/adapters/alpaca.js";
 import { cryptoComParamsString } from "../src/adapters/crypto-com.js";
-import { normalizeKrakenAsset } from "../src/adapters/kraken.js";
+import { nextKrakenNonce, normalizeKrakenAsset, signKrakenRequest } from "../src/adapters/kraken.js";
 import { topstepSymbol } from "../src/adapters/topstep.js";
 import { tradierList } from "../src/adapters/tradier.js";
 import { trading212Symbol } from "../src/adapters/trading212.js";
@@ -46,6 +46,31 @@ describe("signing requests to Webull and Crypto.com", () => {
   it("builds Crypto.com's params string with keys sorted alphabetically", () => {
     expect(cryptoComParamsString({ b: 2, a: "x", c: [1, 2] })).toBe("ax" + "b2" + "c12");
     expect(cryptoComParamsString({})).toBe("");
+  });
+});
+
+describe("signing requests to Kraken", () => {
+  it("matches Kraken's own worked example (docs.kraken.com, Authentication)", () => {
+    // A published sample, not a credential.
+    const secret = "kQH5HW/8p1uGOVjbgWA7FunAmGO8lsSUXNsu3eow76sz84Q18fWxnyRzBHCd3pd5nE9qa99HAZtuZuj6F1huXg=="; // gitleaks:allow
+    expect(
+      signKrakenRequest(
+        "/0/private/AddOrder",
+        "1616492376594",
+        "nonce=1616492376594&ordertype=limit&pair=XBTUSD&price=37500&type=buy&volume=1.25",
+        secret,
+      ),
+    ).toBe("4/dpxb3iT4tp/ZCVEwSnEsLxx0bqyhLpdfOpc6fn7OR8+UClSV5n9E6aSS8MPtnRfp32bAb0nmbRn6H8ndwLUQ==");
+  });
+
+  it("draws nonces from the millisecond clock, each one past the last even within one millisecond", () => {
+    const first = Number(nextKrakenNonce());
+    expect(first).toBeGreaterThan(Date.now() - 60_000);
+    expect(first).toBeLessThanOrEqual(Date.now());
+    const second = Number(nextKrakenNonce());
+    const third = Number(nextKrakenNonce());
+    expect(second).toBeGreaterThan(first);
+    expect(third).toBeGreaterThan(second);
   });
 });
 

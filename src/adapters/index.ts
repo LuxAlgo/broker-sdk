@@ -54,7 +54,15 @@ export {
 export { hyperliquid, parseHyperliquidFills, type HyperliquidRaw } from "./hyperliquid.js";
 export { ibkrFlex, parseFlexStatement, type IbkrFlexRaw, type ParsedFlexStatement } from "./ibkr-flex.js";
 export { gemini, type GeminiRaw } from "./gemini.js";
-export { kraken, normalizeKrakenAsset, type KrakenRaw } from "./kraken.js";
+export {
+  kraken,
+  KrakenApiError,
+  krakenPrivate,
+  nextKrakenNonce,
+  normalizeKrakenAsset,
+  signKrakenRequest,
+  type KrakenRaw,
+} from "./kraken.js";
 export { kucoin, type KucoinRaw } from "./kucoin.js";
 export { okx, type OkxRaw } from "./okx.js";
 export { publicDotCom, parsePublicHistory, type PublicRaw, type PublicTransaction } from "./public.js";
