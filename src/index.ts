@@ -14,6 +14,7 @@ export type { Credentials, FetchContext, NormalizationContext } from "./adapters
 export type BrokerCredentials = {
   alpaca: { apiKey: string; apiSecret: string };
   binance: { apiKey: string; apiSecret: string };
+  bitunix: { apiKey: string; apiSecret: string };
   bybit: { apiKey: string; apiSecret: string };
   coinbase: { clientId: string; clientSecret: string; refreshToken: string; accessToken?: string; expiresAt?: string };
   "crypto-com": { apiKey: string; apiSecret: string };
