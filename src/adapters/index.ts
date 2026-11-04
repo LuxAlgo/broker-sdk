@@ -1,5 +1,6 @@
 import { alpaca } from "./alpaca.js";
 import { binance } from "./binance.js";
+import { bitunix } from "./bitunix.js";
 import { bybit } from "./bybit.js";
 import { coinbase } from "./coinbase.js";
 import { cryptoCom } from "./crypto-com.js";
@@ -33,6 +34,7 @@ export {
 } from "./alpaca-bars.js";
 export { buildBar, effectiveBarLimit, finalizeBars } from "./bars.js";
 export { binance, parseBinanceFuturesTrades, type BinanceRaw } from "./binance.js";
+export { bitunix, bitunixSignature, type BitunixRaw } from "./bitunix.js";
 export { bybit, type BybitRaw } from "./bybit.js";
 export {
   coinbase,
@@ -98,6 +100,7 @@ export type AnyBrokerAdapter = BrokerAdapter<any>;
 export const adapters = {
   alpaca,
   binance,
+  bitunix,
   bybit,
   coinbase,
   "crypto-com": cryptoCom,
