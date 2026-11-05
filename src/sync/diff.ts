@@ -13,16 +13,20 @@ import type { SyncEvent } from "./events.js";
 
 /**
  * Identity of one trade for diffing: symbol + side + quantity + price +
- * executedAt. Two fills identical on all five fields collide, so the diff
- * counts occurrences per key instead of assuming keys are unique.
+ * executedAt, plus native position identity when supplied. The diff counts
+ * occurrences per key instead of assuming identical fills are unique.
  */
-export const tradeKey = (trade: Trade): string =>
-  [trade.symbol, trade.side, String(trade.quantity), String(trade.price), trade.executedAt ?? ""].join("|");
+export const tradeKey = (trade: Trade): string => {
+  const fields = [trade.symbol, trade.side, String(trade.quantity), String(trade.price), trade.executedAt ?? ""];
+  if (trade.positionId === undefined) return fields.join("|");
+  // Native tuples contain no literal pipes, keeping them disjoint from legacy keys.
+  return JSON.stringify([...fields, trade.positionSide ?? null, trade.positionId]).replaceAll("|", "\\u007c");
+};
 
 /**
  * Diff two snapshots of the same broker into events. Accounts are matched
  * by their broker-side stable `id`, positions by `symbol` and hedge-mode
- * `positionSide`, trades by `tradeKey` occurrence counting.
+ * `positionSide` plus native ID when supplied, trades by `tradeKey` occurrence counting.
  */
 export const diffSnapshots = (previous: BrokerSnapshot | undefined, next: BrokerSnapshot): SyncEvent[] => {
   if (!previous) return [];
@@ -69,9 +73,10 @@ export const diffSnapshots = (previous: BrokerSnapshot | undefined, next: Broker
       });
     }
 
-    // Positions, keyed by symbol and, in hedge mode, by side: a long and a
-    // short on one symbol are two positions.
-    const positionKey = (position: Position) => `${position.symbol}\u0000${position.positionSide ?? ""}`;
+    // Native tuples escape NUL, keeping them disjoint from legacy position keys.
+    const positionKey = (position: Position) => position.positionId === undefined
+      ? `${position.symbol}\u0000${position.positionSide ?? ""}`
+      : JSON.stringify([position.symbol, position.positionSide ?? null, position.positionId]);
     const beforePositions = new Map(before.positions.map((position) => [positionKey(position), position]));
     for (const position of account.positions) {
       const previousPosition = beforePositions.get(positionKey(position));
@@ -88,6 +93,7 @@ export const diffSnapshots = (previous: BrokerSnapshot | undefined, next: Broker
           at,
           symbol: position.symbol,
           ...(position.positionSide ? { positionSide: position.positionSide } : {}),
+          ...(position.positionId !== undefined ? { positionId: position.positionId } : {}),
           quantity: position.quantity,
           previousQuantity: previousPosition.quantity,
         });
@@ -101,6 +107,7 @@ export const diffSnapshots = (previous: BrokerSnapshot | undefined, next: Broker
         at,
         symbol: previousPosition.symbol,
         ...(previousPosition.positionSide ? { positionSide: previousPosition.positionSide } : {}),
+        ...(previousPosition.positionId !== undefined ? { positionId: previousPosition.positionId } : {}),
         previousQuantity: previousPosition.quantity,
       });
     }

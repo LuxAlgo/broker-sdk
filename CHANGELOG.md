@@ -2,6 +2,17 @@
 
 All notable changes to `@luxalgo/broker-sdk` are documented here.
 
+## Unreleased
+
+### Fixed
+
+- **Stats:** fills that carry a native `positionId` match FIFO lots only within that position (symbol, hedge side and ID) and account, so two positions open at once on one symbol and side no longer close each other's lots. The same ID in two accounts stays separate. Fills without an ID match as before.
+- **Sync diff:** positions that carry `positionId` are matched by it, so a snapshot with several same-side positions on one symbol no longer reports them as newly opened. A new fill identical in price, quantity and time to a known fill of another position is reported as itself. `position_changed` and `position_closed` carry `positionId`.
+
+### Added
+
+- `Position.positionId` and `Trade.positionId`: the broker's native position ID, opaque and local to the account, set only when the broker reports it. An adapter that starts reporting it changes the diff keys once; see [SCHEMA.md](docs/SCHEMA.md#trade).
+
 ## 0.6.0
 
 ### Fixed
