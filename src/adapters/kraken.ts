@@ -10,6 +10,11 @@ import type { BrokerAdapter, Credentials, FetchContext } from "./types.js";
   permission). One signed Balance call; valuation via the public Ticker
   endpoint for the assets held. Kraken's legacy asset codes (XXBT, ZUSD, …)
   are normalized before display.
+
+  The signed call is exported (`krakenPrivate`) so that an app signing the
+  same key for anything else (a WebSocket token, an order read) signs it the
+  one way and draws its nonces from the one clock: Kraken takes a nonce per
+  key that only ever climbs, so two signers of one key must agree.
 */
 
 const KRAKEN_API = "https://api.kraken.com";
@@ -30,13 +35,62 @@ export const normalizeKrakenAsset = (code: string): string => KRAKEN_ASSET_ALIAS
 
 const KRAKEN_FIAT = new Set(["USD", "EUR", "GBP", "CAD", "AUD", "JPY", "CHF"]);
 
-const signRequest = (path: string, nonce: string, postData: string, secret: string): string => {
+/** API-Sign: HMAC-SHA512 of the path and SHA256(nonce + POST data), keyed by the base64-decoded secret. */
+export const signKrakenRequest = (path: string, nonce: string, postData: string, apiSecret: string): string => {
   const message = createHash("sha256")
     .update(nonce + postData)
     .digest();
-  return createHmac("sha512", Buffer.from(secret, "base64"))
+  return createHmac("sha512", Buffer.from(apiSecret, "base64"))
     .update(Buffer.concat([Buffer.from(path, "utf8"), message]))
     .digest("base64");
+};
+
+// Kraken takes a nonce per key that only ever climbs: the millisecond clock, one step past the last nonce
+// sent from this process when two calls land in one millisecond. (Two processes signing one key can still
+// cross; Kraken's "Invalid nonce" is then the word, and the call is simply made again.)
+let lastNonce = 0;
+export const nextKrakenNonce = (): string => {
+  lastNonce = Math.max(Date.now(), lastNonce + 1);
+  return String(lastNonce);
+};
+
+/** Kraken's no, in its own words (`EAPI:Invalid key`, `EGeneral:Permission denied`, `EAPI:Invalid nonce`), kept whole. */
+export class KrakenApiError extends BrokerRequestError {
+  constructor(readonly errors: string[]) {
+    super("kraken", `Kraken error: ${errors.join(", ")}`);
+    this.name = "KrakenApiError";
+  }
+}
+
+/**
+ * One signed call to a Kraken private endpoint (`Balance`, `GetWebSocketsToken`, `OpenOrders`, …), answered
+ * with its result. Kraken's no is a KrakenApiError; rejected credentials and any other refused request are the
+ * SDK's usual errors; a dropped call throws as fetch does.
+ */
+export const krakenPrivate = async <T>(
+  credentials: { apiKey: string; apiSecret: string },
+  endpoint: string,
+  body: Record<string, string> = {},
+  fetchImpl: typeof globalThis.fetch = globalThis.fetch,
+): Promise<T> => {
+  const path = `/0/private/${endpoint}`;
+  const nonce = nextKrakenNonce();
+  const postData = new URLSearchParams({ nonce, ...body }).toString();
+  const response = await fetchImpl(`${KRAKEN_API}${path}`, {
+    method: "POST",
+    headers: {
+      "API-Key": credentials.apiKey,
+      "API-Sign": signKrakenRequest(path, nonce, postData, credentials.apiSecret),
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+    },
+    body: postData,
+  });
+  if (!response.ok) rejectResponse("kraken", "Kraken", response);
+  const answer = (await response.json()) as { error?: string[]; result?: T };
+  if (answer.error && answer.error.length > 0) throw new KrakenApiError(answer.error);
+  if (answer.result === undefined) throw new BrokerRequestError("kraken", "Kraken answered without a result");
+  return answer.result;
 };
 
 export type KrakenRaw = {
@@ -103,25 +157,7 @@ const fetchRaw = async (credentials: Credentials, ctx: FetchContext) => {
     throw new MissingCredentialsError("kraken", "Kraken connection is missing its API key or secret");
   }
 
-  const path = "/0/private/Balance";
-  const nonce = Date.now().toString();
-  const postData = `nonce=${nonce}`;
-  const response = await ctx.fetch(`${KRAKEN_API}${path}`, {
-    method: "POST",
-    headers: {
-      "API-Key": apiKey,
-      "API-Sign": signRequest(path, nonce, postData, apiSecret),
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: postData,
-  });
-  if (!response.ok) rejectResponse("kraken", "Kraken", response);
-  const body = (await response.json()) as { error?: string[]; result?: Record<string, string> };
-  if (body.error && body.error.length > 0) {
-    throw new BrokerRequestError("kraken", `Kraken error: ${body.error.join(", ")}`);
-  }
-
-  const balances = body.result ?? {};
+  const balances = await krakenPrivate<Record<string, string>>({ apiKey, apiSecret }, "Balance", {}, ctx.fetch);
   const assets = [...new Set(Object.keys(balances).map(normalizeKrakenAsset))];
   const usdPrices = await fetchUsdPrices(assets, ctx);
 

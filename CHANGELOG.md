@@ -2,6 +2,12 @@
 
 All notable changes to `@luxalgo/broker-sdk` are documented here.
 
+## Unreleased
+
+### Added
+
+- **Kraken:** `krakenPrivate(credentials, endpoint, body?, fetch?)`, one signed call to a Kraken private endpoint, with `signKrakenRequest`, `nextKrakenNonce` (the millisecond clock, climbing within a process) and `KrakenApiError` (Kraken's `error[]`, kept whole), exported from `@luxalgo/broker-sdk/adapters`. The sync's balance read goes through it, so an app that signs the same key for anything else (a WebSocket token, an order read) signs it the one way and draws its nonces from the one clock.
+
 ## 0.6.0
 
 ### Fixed
