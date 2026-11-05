@@ -2,7 +2,7 @@
 
 All notable changes to `@luxalgo/broker-sdk` are documented here.
 
-## Unreleased
+## 0.7.0
 
 ### Added
 
