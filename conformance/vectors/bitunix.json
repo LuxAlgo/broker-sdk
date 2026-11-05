@@ -1,0 +1,256 @@
+{
+  "broker": "bitunix",
+  "description": "Synthetic fixture matching observed string IDs/timestamps and BUY position labels; exercises Hedge long/short, partial close, duplicate IDs and an unreadable fill. Short is a model test, not a live-API verification.",
+  "raw": {
+    "account": {
+      "marginCoin": "USDT",
+      "available": "1000",
+      "frozen": "10",
+      "margin": "100",
+      "crossUnrealizedPNL": "5",
+      "isolationUnrealizedPNL": "-2",
+      "bonus": "20"
+    },
+    "pendingPositions": [
+      {
+        "positionId": "fixture-long",
+        "symbol": "BTCUSDT",
+        "side": "BUY",
+        "positionMode": "HEDGE",
+        "subAccountId": "fixture-main",
+        "qty": "0.5",
+        "avgOpenPrice": "100",
+        "fee": "-0.2",
+        "funding": "-0.5"
+      }
+    ],
+    "historyPositions": [
+      {
+        "positionId": "fixture-long",
+        "symbol": "BTCUSDT",
+        "side": "BUY",
+        "positionMode": "HEDGE",
+        "subAccountId": "fixture-main"
+      },
+      {
+        "positionId": "fixture-short",
+        "symbol": "BTCUSDT",
+        "side": "SHORT",
+        "positionMode": "HEDGE",
+        "subAccountId": "fixture-main"
+      }
+    ],
+    "trades": [
+      {
+        "tradeId": "fixture-lc",
+        "orderId": "fixture-order-fixture-lc",
+        "symbol": "BTCUSDT",
+        "side": "SELL",
+        "positionMode": "HEDGE",
+        "qty": "0.5",
+        "price": "110",
+        "ctime": "1793192400000",
+        "fee": "0.1",
+        "reduceOnly": true,
+        "orderType": "MARKET"
+      },
+      {
+        "tradeId": "fixture-lo",
+        "orderId": "fixture-order-fixture-lo",
+        "symbol": "BTCUSDT",
+        "side": "BUY",
+        "positionMode": "HEDGE",
+        "qty": "1",
+        "price": "100",
+        "ctime": "1793188800000",
+        "fee": "0.1",
+        "reduceOnly": false,
+        "orderType": "MARKET"
+      },
+      {
+        "tradeId": "fixture-sc",
+        "orderId": "fixture-order-fixture-sc",
+        "symbol": "BTCUSDT",
+        "side": "BUY",
+        "positionMode": "HEDGE",
+        "qty": "2",
+        "price": "90",
+        "ctime": "1793192400000",
+        "fee": "0.1",
+        "reduceOnly": true,
+        "orderType": "MARKET"
+      },
+      {
+        "tradeId": "fixture-so",
+        "orderId": "fixture-order-fixture-so",
+        "symbol": "BTCUSDT",
+        "side": "SELL",
+        "positionMode": "HEDGE",
+        "qty": "2",
+        "price": "100",
+        "ctime": "1793188800000",
+        "fee": "0.1",
+        "reduceOnly": false,
+        "orderType": "MARKET"
+      },
+      {
+        "tradeId": "fixture-lo",
+        "orderId": "fixture-order-fixture-lo",
+        "symbol": "BTCUSDT",
+        "side": "BUY",
+        "positionMode": "HEDGE",
+        "qty": "1",
+        "price": "100",
+        "ctime": "1793188800000",
+        "fee": "0.1",
+        "reduceOnly": false,
+        "orderType": "MARKET"
+      },
+      {
+        "tradeId": "fixture-invalid",
+        "orderId": "fixture-order-fixture-lo",
+        "symbol": "BTCUSDT",
+        "side": "BUY",
+        "positionMode": "HEDGE",
+        "qty": "unreadable",
+        "price": "100",
+        "ctime": "1793188800000",
+        "fee": "0.1",
+        "reduceOnly": false,
+        "orderType": "MARKET"
+      }
+    ],
+    "positionTrades": [
+      {
+        "positionId": "fixture-long",
+        "trades": [
+          {
+            "tradeId": "fixture-lo",
+            "orderId": "fixture-order-fixture-lo",
+            "symbol": "BTCUSDT",
+            "side": "BUY",
+            "positionMode": "HEDGE",
+            "qty": "1",
+            "price": "100",
+            "ctime": "1793188800000",
+            "fee": "0.1",
+            "reduceOnly": false,
+            "orderType": "MARKET"
+          },
+          {
+            "tradeId": "fixture-lc",
+            "orderId": "fixture-order-fixture-lc",
+            "symbol": "BTCUSDT",
+            "side": "SELL",
+            "positionMode": "HEDGE",
+            "qty": "0.5",
+            "price": "110",
+            "ctime": "1793192400000",
+            "fee": "0.1",
+            "reduceOnly": true,
+            "orderType": "MARKET"
+          }
+        ]
+      },
+      {
+        "positionId": "fixture-short",
+        "trades": [
+          {
+            "tradeId": "fixture-so",
+            "orderId": "fixture-order-fixture-so",
+            "symbol": "BTCUSDT",
+            "side": "SELL",
+            "positionMode": "HEDGE",
+            "qty": "2",
+            "price": "100",
+            "ctime": "1793188800000",
+            "fee": "0.1",
+            "reduceOnly": false,
+            "orderType": "MARKET"
+          },
+          {
+            "tradeId": "fixture-sc",
+            "orderId": "fixture-order-fixture-sc",
+            "symbol": "BTCUSDT",
+            "side": "BUY",
+            "positionMode": "HEDGE",
+            "qty": "2",
+            "price": "90",
+            "ctime": "1793192400000",
+            "fee": "0.1",
+            "reduceOnly": true,
+            "orderType": "MARKET"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": [
+    {
+      "id": "bitunix-usdt-futures",
+      "name": "Bitunix USDT futures",
+      "currency": "USDT",
+      "equity": 1113,
+      "positions": [
+        {
+          "symbol": "BTCUSDT",
+          "quantity": 0.5,
+          "averageEntryPrice": 100,
+          "assetClass": "futures",
+          "positionSide": "long",
+          "positionId": "fixture-long"
+        }
+      ],
+      "trades": [
+        {
+          "symbol": "BTCUSDT",
+          "side": "buy",
+          "quantity": 1,
+          "price": 100,
+          "fee": 0.1,
+          "executedAt": "2026-10-28T12:00:00.000Z",
+          "assetClass": "futures",
+          "positionSide": "long",
+          "positionEffect": "open",
+          "positionId": "fixture-long"
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "sell",
+          "quantity": 2,
+          "price": 100,
+          "fee": 0.1,
+          "executedAt": "2026-10-28T12:00:00.000Z",
+          "assetClass": "futures",
+          "positionSide": "short",
+          "positionEffect": "open",
+          "positionId": "fixture-short"
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "sell",
+          "quantity": 0.5,
+          "price": 110,
+          "fee": 0.1,
+          "executedAt": "2026-10-28T13:00:00.000Z",
+          "assetClass": "futures",
+          "positionSide": "long",
+          "positionEffect": "close",
+          "positionId": "fixture-long"
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "buy",
+          "quantity": 2,
+          "price": 90,
+          "fee": 0.1,
+          "executedAt": "2026-10-28T13:00:00.000Z",
+          "assetClass": "futures",
+          "positionSide": "short",
+          "positionEffect": "close",
+          "positionId": "fixture-short"
+        }
+      ]
+    }
+  ]
+}
