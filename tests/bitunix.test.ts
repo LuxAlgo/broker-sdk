@@ -116,6 +116,27 @@ describe("Bitunix signing and IO", () => {
     expect(bitunix.normalize(result.raw)[0]!.trades[0]).toMatchObject({ positionSide: "long", positionEffect: "close" });
   });
 
+  it("skips per-position fill reads for Hedge positions untouched since historySince", async () => {
+    const since = NOW - 30 * 86400000;
+    const positions = [
+      position("stale", "BUY", { mtime: String(since - 1) }),
+      position("boundary", "BUY", { mtime: String(since) }),
+      position("recent", "SELL", { mtime: String(NOW - 1000) }),
+      position("unknown-mtime", "BUY"),
+    ];
+    const read = async (historySince?: string) => {
+      const remote = gateway({
+        "/api/v1/futures/position/get_history_positions": () => json({ positionList: positions, total: "4" }),
+      });
+      await settle(bitunix.fetchRaw(credentials, { fetch: remote.fetch, ...(historySince ? { historySince } : {}) }));
+      return remote.calls
+        .filter((call) => call.url.pathname.endsWith("get_history_trades") && call.url.searchParams.has("positionId"))
+        .map((call) => call.url.searchParams.get("positionId"));
+    };
+    expect(await read(new Date(since).toISOString())).toEqual(["boundary", "recent", "unknown-mtime"]);
+    expect(await read()).toEqual(["stale", "boundary", "recent", "unknown-mtime"]);
+  });
+
   it("paginates the position catalogue and position-filtered fills too", async () => {
     const remote = gateway({
       "/api/v1/futures/position/get_history_positions": (query) => json({
@@ -226,8 +247,17 @@ describe("Bitunix normalization", () => {
     expect(trades[1]!.positionEffect).toBe("close");
   });
 
-  it("rejects unknown hedge association and conflicting fill identity", () => {
-    expect(() => bitunix.normalize(raw({ trades: [fill("missing")] }))).toThrow("no matching position");
+  it("keeps a Hedge fill whose position is missing from history, without position labels", () => {
+    const trades = bitunix.normalize(raw({ trades: [fill("open"), fill("close", "SELL")] }))[0]!.trades;
+    expect(trades).toHaveLength(2);
+    for (const trade of trades) {
+      expect(trade.positionSide).toBeUndefined();
+      expect(trade.positionId).toBeUndefined();
+    }
+    expect(trades.map((trade) => trade.positionEffect)).toEqual([undefined, "close"]);
+  });
+
+  it("rejects conflicting fill identity", () => {
     expect(() => bitunix.normalize(raw({ trades: [fill("a", "BUY", { positionMode: "ONE_WAY" }), fill("a", "BUY", { positionMode: "ONE_WAY", price: "101" })] }))).toThrow("conflicting facts");
   });
 

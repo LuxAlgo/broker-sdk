@@ -159,9 +159,6 @@ const parseTrades = (raw: BitunixRaw, positions: Map<string, Row>): Trade[] => {
     };
     if (row.positionMode !== "HEDGE" && row.positionMode !== "ONE_WAY") fail("Bitunix returned an unknown position mode");
     const position = row.positionMode === "HEDGE" ? owners.get(fillKey(row)) : undefined;
-    if (row.positionMode === "HEDGE" && !position) {
-      fail("Bitunix hedge fill has no matching position; available history may be incomplete");
-    }
     if (position) {
       const positionSide = direction(position.side)!;
       const positionEffect = (side === "buy") === (positionSide === "long") ? "open" : "close";
@@ -172,7 +169,8 @@ const parseTrades = (raw: BitunixRaw, positions: Map<string, Row>): Trade[] => {
       trade.positionEffect = positionEffect;
       trade.positionId = text(position.positionId)!;
     } else if (row.reduceOnly === true) {
-      // A non-reduce-only one-way fill can reverse a position: don't call it an opening.
+      // One-way fills, and Hedge fills whose position is missing from the venue's history, carry no
+      // position labels. A non-reduce-only fill can reverse a position: don't call it an opening.
       trade.positionEffect = "close";
     }
     const key = fillKey(row);
@@ -352,6 +350,10 @@ const fetchRaw = async (credentials: Credentials, ctx: FetchContext): Promise<{ 
   };
   for (const [positionId, position] of positionsById(raw)) {
     if (position.positionMode !== "HEDGE") continue;
+    // A position's last modification is at or after its last fill, so one untouched since the
+    // window opened has no fills in it. A position without a readable mtime is read anyway.
+    const modified = number(position.mtime);
+    if (since !== undefined && modified !== undefined && modified < since) continue;
     const trades = await list("trades", { ...window, positionId, symbol: String(position.symbol) }, "tradeList");
     raw.positionTrades.push({ positionId, trades });
   }

@@ -40,10 +40,13 @@ source account IDs cause an error. Main/subaccount traversal is not implemented.
 
 Hedge fills in the live sample lack `positionId` and `tradeSide`. To associate
 them with the position side, the adapter also fetches fills by each discovered
-Hedge position ID, with the same time window. This initial implementation queries
-all discovered Hedge positions on each sync; large accounts may require many
-requests. It favors a verifiable association over guessing from `reduceOnly`.
-Unmatched Hedge fills fail the snapshot instead of being silently netted.
+Hedge position ID, with the same time window. With `historySince`, positions whose
+last modification (`mtime`, at or after their last fill) is before the window are
+skipped, so later syncs read only positions that can have fills in it; the first
+sync reads every discovered Hedge position. A position without a readable `mtime`
+is always read. The adapter favors a verifiable association over guessing from
+`reduceOnly`. A Hedge fill whose position is missing from the venue's history
+keeps no position labels, like a One-way fill, instead of failing the snapshot.
 
 The normalizer:
 
