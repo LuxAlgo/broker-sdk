@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Trade } from "../src/schema.js";
-import { computeStats, positionsFromTrades } from "../src/stats.js";
+import { computeStats, matchRoundTrips, positionsFromTrades } from "../src/stats.js";
 
 const trade = (overrides: Partial<Trade>): Trade => ({
   symbol: "BTC",
@@ -40,6 +40,75 @@ describe("the trading stats derived from trades", () => {
     const stats = statsFor([trade({ side: "sell", price: 500, executedAt: "2026-01-01T00:00:00Z" })]);
     expect(stats.trades?.realizedPnl).toBe(0);
     expect(stats.trades?.closedTrades).toBe(0);
+  });
+
+  it.each([
+    { positionSide: "long", open: "buy", close: "sell", first: 100, second: 200 },
+    { positionSide: "short", open: "sell", close: "buy", first: 200, second: 100 },
+  ] as const)("close the correct interleaved native $positionSide position", ({ positionSide, open, close, first, second }) => {
+    const stats = statsFor([
+      trade({ positionId: "A", positionSide, side: open, price: first, executedAt: "2026-01-01" }),
+      trade({ positionId: "B", positionSide, side: open, price: second, executedAt: "2026-01-02" }),
+      trade({ positionId: "B", positionSide, side: close, price: 150, executedAt: "2026-01-03" }),
+    ]);
+    expect(stats.trades?.realizedPnl).toBe(-50);
+    expect(stats.trades?.losses).toBe(1);
+    expect(stats.trades?.bySymbol.BTC?.realizedPnl).toBe(-50);
+  });
+
+  it.each([
+    [undefined, ""],
+    ["", undefined],
+    ["01", "1"],
+    [" A", "A"],
+    ["A\u0000long", "A"],
+  ])("keep opaque position IDs %j and %j separate from each other and legacy lots", (first, second) => {
+    const a = first === undefined ? {} : { positionId: first };
+    const b = second === undefined ? {} : { positionId: second };
+    const stats = statsFor([
+      trade({ ...a, price: 100, executedAt: "2026-01-01" }),
+      trade({ ...b, price: 200, executedAt: "2026-01-02" }),
+      trade({ ...b, side: "sell", price: 150, executedAt: "2026-01-03" }),
+    ]);
+    expect(stats.trades?.realizedPnl).toBe(-50);
+  });
+
+  it("match multiple lots FIFO within a native position", () => {
+    const trips = matchRoundTrips([
+      trade({ positionId: "A", price: 100 }),
+      trade({ positionId: "A", price: 200 }),
+      trade({ positionId: "A", side: "sell", price: 150, quantity: 1.5 }),
+    ]);
+    expect(trips).toEqual([{ pnl: 50 }, { pnl: -25 }]);
+  });
+
+  it.each([
+    { symbol: "ETH", positionSide: "long" },
+    { symbol: "BTC", positionSide: "short" },
+    { symbol: "BTC\u0000long", positionSide: undefined },
+  ] as const)("retain symbol and hedge side in native identity: $symbol / $positionSide", ({ symbol, positionSide }) => {
+    const trips = matchRoundTrips([
+      trade({ positionId: "A", positionSide: "long", price: 100 }),
+      trade({
+        positionId: "A", symbol, ...(positionSide === undefined ? {} : { positionSide }),
+        side: positionSide === "short" ? "buy" : "sell", price: 150,
+      }),
+    ]);
+    expect(trips).toEqual([]);
+  });
+
+  it("keep identical native IDs local to each account when aggregating stats", () => {
+    const stats = computeStats([
+      { equity: 0, positions: [], trades: [trade({ positionId: "A", price: 100, executedAt: "2026-01-01" })] },
+      {
+        equity: 0, positions: [], trades: [
+          trade({ positionId: "A", price: 200, executedAt: "2026-01-02" }),
+          trade({ positionId: "A", side: "sell", price: 150, executedAt: "2026-01-03" }),
+        ],
+      },
+    ]);
+    expect(stats.trades?.realizedPnl).toBe(-50);
+    expect(stats.trades?.closedTrades).toBe(1);
   });
 
   it("keep symbols separate — a win on one symbol never offsets another's loss", () => {

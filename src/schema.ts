@@ -32,6 +32,8 @@ export type Position = {
    * broker keeps them apart (Binance hedge mode). Absent when they net.
    */
   positionSide?: "long" | "short";
+  /** Broker-reported native position ID, opaque and account-local. Undefined means absent; an empty string is an ID. */
+  positionId?: string;
 };
 
 /** One executed trade (a fill), always from the account holder's side. */
@@ -57,6 +59,8 @@ export type Trade = {
    * when the broker keeps them apart (Binance hedge mode). Fills without it net.
    */
   positionSide?: "long" | "short";
+  /** Broker-reported native position ID linking fills to a position; same contract as Position.positionId. */
+  positionId?: string;
 };
 
 /** One account at a broker, fully normalized. */
