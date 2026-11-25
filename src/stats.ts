@@ -41,25 +41,40 @@ export type StatsAccount = Pick<Account, "equity" | "positions" | "trades"> & {
   broker?: string;
 };
 
+/**
+ * A trade with the index of the account it came from. Native position IDs
+ * are local to an account, so the index scopes them without rewriting the
+ * trade's own `positionId`.
+ */
+type ScopedTrade = { trade: Trade; account: number };
+
+const inOneAccount = (trades: Trade[]): ScopedTrade[] => trades.map((trade) => ({ trade, account: 0 }));
+
 /** FIFO-match sells against prior buys; returns per-round-trip results. */
-export const matchRoundTrips = (trades: Trade[]): { pnl: number }[] => {
-  const sorted = [...trades].sort((a, b) => (a.executedAt ?? "").localeCompare(b.executedAt ?? ""));
+export const matchRoundTrips = (trades: Trade[]): { pnl: number }[] => matchScopedRoundTrips(inOneAccount(trades));
+
+const matchScopedRoundTrips = (entries: ScopedTrade[]): { pnl: number }[] => {
+  const sorted = [...entries].sort((a, b) => (a.trade.executedAt ?? "").localeCompare(b.trade.executedAt ?? ""));
   const openLots = new Map<string, { quantity: number; price: number }[]>();
+  const nativeLots = new Map<string, { quantity: number; price: number }[]>();
   const roundTrips: { pnl: number }[] = [];
 
-  for (const trade of sorted) {
+  for (const { trade, account } of sorted) {
     // A hedge-mode side is its own position, so its lots never meet the other
     // side's; the short side opens on sells and closes on buys.
-    const key = trade.positionSide ? `${trade.symbol}\u0000${trade.positionSide}` : trade.symbol;
+    const buckets = trade.positionId === undefined ? openLots : nativeLots;
+    const key = trade.positionId === undefined
+      ? (trade.positionSide ? `${trade.symbol}\u0000${trade.positionSide}` : trade.symbol)
+      : JSON.stringify([account, trade.symbol, trade.positionSide, trade.positionId]);
     const short = trade.positionSide === "short";
     if ((trade.side === "buy") !== short) {
-      const lots = openLots.get(key) ?? [];
+      const lots = buckets.get(key) ?? [];
       lots.push({ quantity: trade.quantity, price: trade.price });
-      openLots.set(key, lots);
+      buckets.set(key, lots);
       continue;
     }
     let remaining = trade.quantity;
-    const lots = openLots.get(key) ?? [];
+    const lots = buckets.get(key) ?? [];
     while (remaining > 1e-9 && lots.length > 0) {
       const lot = lots[0];
       if (!lot) break;
@@ -76,8 +91,11 @@ export const matchRoundTrips = (trades: Trade[]): { pnl: number }[] => {
   return roundTrips;
 };
 
-export const computeTradeStats = (trades: Trade[]): TradeStats | null => {
-  if (trades.length === 0) return null;
+export const computeTradeStats = (trades: Trade[]): TradeStats | null => scopedTradeStats(inOneAccount(trades));
+
+const scopedTradeStats = (entries: ScopedTrade[]): TradeStats | null => {
+  if (entries.length === 0) return null;
+  const trades = entries.map((entry) => entry.trade);
 
   const bySymbol: Record<string, SymbolStats> = {};
   let totalNotional = 0;
@@ -92,7 +110,7 @@ export const computeTradeStats = (trades: Trade[]): TradeStats | null => {
   // Per-symbol realized PnL, then roll the round-trips up for win/loss stats.
   const allRoundTrips: { pnl: number }[] = [];
   for (const symbol of Object.keys(bySymbol)) {
-    const symbolTrips = matchRoundTrips(trades.filter((trade) => trade.symbol === symbol));
+    const symbolTrips = matchScopedRoundTrips(entries.filter((entry) => entry.trade.symbol === symbol));
     const stats = bySymbol[symbol];
     if (stats) stats.realizedPnl = symbolTrips.reduce((sum, trip) => sum + trip.pnl, 0);
     allRoundTrips.push(...symbolTrips);
@@ -148,7 +166,9 @@ export const computeStats = (accounts: StatsAccount[]): PortfolioStats => {
     accountCount: accounts.length,
     equityByBroker,
     topPositions,
-    trades: computeTradeStats(accounts.flatMap((account) => account.trades)),
+    trades: scopedTradeStats(accounts.flatMap((account, index) =>
+      account.trades.map((trade) => ({ trade, account: index })),
+    )),
   };
 };
 

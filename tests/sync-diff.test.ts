@@ -29,9 +29,107 @@ describe("tradeKey", () => {
     delete trade.executedAt;
     expect(tradeKey(trade)).toBe("AAPL|buy|10|200|");
   });
+
+  it.each([
+    { positionId: "B" }, { positionId: "" }, {},
+    { positionId: "A", symbol: "MSFT" },
+    { positionId: "A", positionSide: "short" as const },
+  ])("distinguishes native fill identity from %j", (identity) => {
+    const a = makeTrade({ positionId: "A", positionSide: "long" });
+    const b = makeTrade({ positionSide: "long", ...identity });
+    expect(tradeKey(a)).not.toBe(tradeKey(b));
+  });
+
+  it("keeps opaque delimiters in separate native tuple fields", () => {
+    const a = makeTrade({ symbol: "A|buy", positionId: "x|\u0000\"\\" });
+    const b = makeTrade({ symbol: "A", positionId: "buy|x|\u0000\"\\" });
+    expect(tradeKey(a)).not.toBe(tradeKey(b));
+  });
+
+  it("distinguishes an empty native fill ID from an absent ID", () => {
+    expect(tradeKey(makeTrade({ positionId: "" }))).not.toBe(tradeKey(makeTrade()));
+  });
+
+  it("cannot collide with a legacy key containing a JSON tuple", () => {
+    const native = makeTrade({ symbol: "AAPL|buy|10|200|", executedAt: "", positionId: "A" });
+    const legacy = makeTrade({ symbol: '["AAPL', executedAt: '\",\"buy\",\"10\",\"200\",\"\",null,\"A\"]' });
+    expect(tradeKey(native)).not.toBe(tradeKey(legacy));
+  });
 });
 
 describe("diffSnapshots", () => {
+  describe("native position identity", () => {
+    it.each([false, true])("emits nothing for unchanged same-side positions (reordered: %s)", (reordered) => {
+      const a = makePosition({ positionId: "A", positionSide: "long", quantity: 1 });
+      const b = makePosition({ positionId: "B", positionSide: "long", quantity: 2 });
+      const previous = makeSnapshot({ accounts: [makeAccount({ positions: [a, b] })] });
+      const next = makeSnapshot({ accounts: [makeAccount({ positions: reordered ? [b, a] : [a, b] })] });
+      expect(diffSnapshots(previous, next)).toEqual([]);
+    });
+
+    it.each(["A", "", "opaque|\u0000\"\\id"])("includes native ID %j in changed and closed events", (positionId) => {
+      const position = makePosition({ positionId, positionSide: "long", quantity: 10 });
+      const closed = makePosition({ positionId: `${positionId}-closed`, positionSide: "long", quantity: 3 });
+      const previous = makeSnapshot({ accounts: [makeAccount({ positions: [position, closed] })] });
+      const next = makeSnapshot({ accounts: [makeAccount({ positions: [{ ...position, quantity: 4 }] })] });
+      expect(diffSnapshots(previous, next)).toEqual([
+        { type: "position_changed", broker: "alpaca", accountId: "acct-1", at: next.fetchedAt,
+          symbol: "AAPL", positionSide: "long", positionId, quantity: 4, previousQuantity: 10 },
+        { type: "position_closed", broker: "alpaca", accountId: "acct-1", at: next.fetchedAt,
+          symbol: "AAPL", positionSide: "long", positionId: closed.positionId, previousQuantity: 3 },
+      ]);
+    });
+
+    it.each([
+      { positionId: "B" },
+      { positionId: "" },
+      {},
+      { positionId: "A", symbol: "MSFT" },
+      { positionId: "A", positionSide: "short" as const },
+    ])("opens and closes when native identity becomes %j", (replacement) => {
+      const position = makePosition({ positionId: "A", positionSide: "long" });
+      const nextPosition = makePosition({ positionSide: "long", ...replacement });
+      const previous = makeSnapshot({ accounts: [makeAccount({ positions: [position] })] });
+      const next = makeSnapshot({ accounts: [makeAccount({ positions: [nextPosition] })] });
+      expect(diffSnapshots(previous, next)).toEqual([
+        { type: "position_opened", broker: "alpaca", accountId: "acct-1", at: next.fetchedAt, position: nextPosition },
+        { type: "position_closed", broker: "alpaca", accountId: "acct-1", at: next.fetchedAt,
+          symbol: "AAPL", positionSide: "long", positionId: "A", previousQuantity: 10 },
+      ]);
+    });
+
+    it("keeps empty native and absent IDs distinct alongside opaque tuple delimiters", () => {
+      const positions = [
+        makePosition(), makePosition({ positionId: "" }),
+        makePosition({ symbol: "A\u0000long", positionId: "x|\"\\" }),
+        makePosition({ symbol: "A", positionSide: "long", positionId: "x|\"\\" }),
+      ];
+      const previous = makeSnapshot({ accounts: [makeAccount({ positions })] });
+      const next = makeSnapshot({ accounts: [makeAccount({ positions: [...positions].reverse() })] });
+      expect(diffSnapshots(previous, next)).toEqual([]);
+    });
+
+    it.each(["B", "", undefined])("emits only the newly prepended fill with ID %j", (positionId) => {
+      const a = makeTrade({ positionId: "A", positionSide: "long" });
+      const b = makeTrade({ positionSide: "long", ...(positionId !== undefined ? { positionId } : {}) });
+      const previous = makeSnapshot({ accounts: [makeAccount({ trades: [a] })] });
+      const next = makeSnapshot({ accounts: [makeAccount({ trades: [b, a] })] });
+      expect(diffSnapshots(previous, next)).toEqual([
+        { type: "trade_executed", broker: "alpaca", accountId: "acct-1", at: next.fetchedAt, trade: b },
+      ]);
+    });
+
+    it("counts duplicate occurrences independently for each native fill identity", () => {
+      const a = makeTrade({ positionId: "A" });
+      const b = makeTrade({ positionId: "B" });
+      const previous = makeSnapshot({ accounts: [makeAccount({ trades: [a, a, b] })] });
+      const next = makeSnapshot({ accounts: [makeAccount({ trades: [b, b, a] })] });
+      expect(diffSnapshots(previous, next)).toEqual([
+        { type: "trade_executed", broker: "alpaca", accountId: "acct-1", at: next.fetchedAt, trade: b },
+      ]);
+    });
+  });
+
   it("emits nothing for the first-ever snapshot (baseline only)", () => {
     const next = makeSnapshot({
       accounts: [

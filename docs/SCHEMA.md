@@ -27,6 +27,7 @@ One shape for everything, regardless of broker. This document is the human-reada
 | `averageEntryPrice?` | `number` | Per unit in the account's `currency`, only when the broker reports it (or a real cost basis it derives from, e.g. Tradier's `cost_basis ÷ quantity`). |
 | `assetClass?` | `"equity" \| "option" \| "futures" \| "forex" \| "crypto" \| "cash" \| "other"` | Only when the broker states it (Alpaca, IBKR, Public) or the venue implies it (a Topstep position is always a future; a Kraken USD balance is cash). Never guessed — Webull and Questrade omit it. |
 | `positionSide?` | `"long" \| "short"` | Only when the broker keeps a long and a short position on one symbol apart (Binance hedge mode); each side is its own position. |
+| `positionId?` | `string` | Broker-reported native position ID, opaque and local to the account. Identity also includes `symbol` and `positionSide`. Omit when unavailable; only `undefined` means absent, and an empty string is a distinct ID. Never inferred. |
 
 ### Trade
 
@@ -42,6 +43,9 @@ One shape for everything, regardless of broker. This document is the human-reada
 | `multiplier?` | `number` | Contract size, only when the broker reports it (Webull `option_contract_multiplier`). |
 | `positionEffect?` | `"open" \| "close"` | Only when the broker reports whether the fill opened or closed a position (Webull `position_intent`, Binance hedge mode). |
 | `positionSide?` | `"long" \| "short"` | Only when the broker keeps a long and a short position on one symbol apart (Binance hedge mode `positionSide`). Fills without it net into one position. |
+| `positionId?` | `string` | Native position ID linking the fill to a position, with the same contract as `Position.positionId`. FIFO stats match only within that native identity, separately from fills without an ID. Fills without IDs retain existing symbol/hedge-side matching. |
+
+When `positionId` is present, `diffSnapshots` matches positions by `symbol`, `positionSide` and `positionId`, and fills by `tradeKey` including that identity, so concurrent same-side positions and identical fills of different positions stay apart. Keys without an ID are unchanged. An adapter that starts reporting `positionId` therefore changes those keys once: the first diff against a snapshot saved before the change reports `position_closed` and `position_opened` for every open position, and `trade_executed` again for fills with an ID that are still in the fetched history. Adding `positionId` to an existing adapter should be called out in its release notes.
 
 ### Bar
 
